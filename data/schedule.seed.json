@@ -1,0 +1,87 @@
+{
+  "App_Data": [
+    {
+      "Date": 46204,
+      "StaffName": "田中 猛",
+      "StartTime": 0.375,
+      "EndTime": 0.4375,
+      "ProgramName": "RDSP 2026",
+      "Role": "全体管理",
+      "GatheringTime": 0.3680555556,
+      "GatheringPlace": "OIC 1階ロビー",
+      "EventName": "Opening / Orientation",
+      "Destination": "OIC 教室",
+      "Status": "確定",
+      "Notes": "Excelシリアル日付・時刻のMVPサンプル",
+      "UpdatedAt": "2026-06-23 09:00"
+    },
+    {
+      "Date": "2026-07-01",
+      "StaffName": "佐藤 花子",
+      "StartTime": "09:00",
+      "EndTime": "10:30",
+      "ProgramName": "RDSP 2026",
+      "Role": "受付",
+      "GatheringTime": "08:50",
+      "GatheringPlace": "OIC 1階ロビー",
+      "EventName": "Opening / Orientation",
+      "Destination": "OIC 教室",
+      "Status": "確認中",
+      "Notes": "文字列日付・時刻のMVPサンプル",
+      "UpdatedAt": "2026-06-23 09:00"
+    },
+    {
+      "Date": "2026-07-01",
+      "StaffName": "佐藤 花子",
+      "StartTime": "13:00",
+      "EndTime": "15:00",
+      "ProgramName": "KSEP Summer",
+      "Role": "教室対応",
+      "GatheringTime": "12:50",
+      "GatheringPlace": "B棟 201",
+      "EventName": "Workshop",
+      "Destination": "B棟 201",
+      "Status": "仮",
+      "Notes": "同一職員の複数予定サンプル",
+      "UpdatedAt": "2026-06-23 09:00"
+    },
+    {
+      "Date": "2026-07-01",
+      "StaffName": "鈴木 一郎",
+      "StartTime": "10:45",
+      "EndTime": "12:00",
+      "ProgramName": "RDSP 2026",
+      "Role": "引率",
+      "GatheringTime": "10:30",
+      "GatheringPlace": "OIC 正門",
+      "EventName": "Campus Tour",
+      "Destination": "キャンパス内",
+      "Status": "変更あり",
+      "Notes": "",
+      "UpdatedAt": "2026-06-23 09:00"
+    },
+    {
+      "Date": "2026-07-02",
+      "StaffName": "山本 美咲",
+      "StartTime": "14:00",
+      "EndTime": "16:00",
+      "ProgramName": "Asia Bridge",
+      "Role": "イベント対応",
+      "GatheringTime": "13:45",
+      "GatheringPlace": "OIC ホール",
+      "EventName": "Welcome Event",
+      "Destination": "OIC ホール",
+      "Status": "中止",
+      "Notes": "ステータス表示サンプル",
+      "UpdatedAt": "2026-06-23 09:00"
+    }
+  ],
+  "Master_Staff": [
+    { "StaffId": "s1", "StaffName": "田中 猛", "DisplayOrder": 1, "Active": true, "Notes": "" },
+    { "StaffId": "s2", "StaffName": "佐藤 花子", "DisplayOrder": 2, "Active": true, "Notes": "" },
+    { "StaffId": "s3", "StaffName": "鈴木 一郎", "DisplayOrder": 3, "Active": true, "Notes": "" },
+    { "StaffId": "s4", "StaffName": "山本 美咲", "DisplayOrder": 4, "Active": true, "Notes": "" },
+    { "StaffId": "s5", "StaffName": "高橋 健", "DisplayOrder": 5, "Active": true, "Notes": "予定なし表示サンプル" },
+    { "StaffId": "s6", "StaffName": "伊藤 葵", "DisplayOrder": 6, "Active": true, "Notes": "予定なし表示サンプル" }
+  ]
+}

@@ -1,0 +1,2 @@
+const styles: Record<string,string> = { '確定':'bg-green-100 text-green-800 border-green-300','仮':'bg-gray-100 text-gray-800 border-gray-300','確認中':'bg-yellow-100 text-yellow-800 border-yellow-300','変更あり':'bg-orange-100 text-orange-800 border-orange-300','中止':'bg-red-100 text-red-800 border-red-300' };
+export default function StatusBadge({ status }: { status: string }) { return <span className={`rounded border px-2 py-0.5 text-xs font-semibold ${styles[status]||styles['仮']}`}>{status}</span>; }

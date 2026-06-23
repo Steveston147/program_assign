@@ -1,0 +1,3 @@
+import { NextResponse } from 'next/server';
+import { authCookieOptions, createAuthCookieValue, getAuthCookieName, verifyPassword } from '@/lib/auth';
+export async function POST(request: Request) { try { const { password } = await request.json(); if(!verifyPassword(String(password||''))) return NextResponse.json({ error:'パスワードが違います' }, { status: 401 }); const res=NextResponse.json({ ok:true }); res.cookies.set(getAuthCookieName(), createAuthCookieValue(), authCookieOptions); return res; } catch(e) { return NextResponse.json({ error: e instanceof Error ? e.message : 'login error' }, { status: 500 }); } }
