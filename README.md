@@ -144,6 +144,4 @@ MVPでは、`npm run dev` または `npm run build` の前に `scripts/create-sa
 
 ## `/api/schedule` のフォールバック動作
 
-Vercel本番環境などで `data/schedule.xlsx` が存在しない、または読み込みに失敗した場合、`/api/schedule` はサーバーログに原因を出力したうえで `data/schedule.seed.json` を直接読み込み、同じレスポンス形式（`items`, `staff`, `dates`, `programs`, `statuses`, `updatedAt`）でサンプルデータを返します。これにより、Excel本体が読み込めない場合でもログイン後の職員スケジュール画面を表示できます。
-
-このフォールバックはMVPの起動補助です。本番運用では引き続き、田中さんが更新した実Excelを `data/schedule.xlsx` として配置・差し替えしてください。Excelは `/public` には置かず、ブラウザは `/api/schedule` のJSONだけを取得します。
+`data/schedule.xlsx` が存在しない、または読み込みに失敗した場合、`/api/schedule` はサーバーログに原因を出力し、`data/schedule.seed.json` から同じレスポンス形式のサンプルデータを返します。Excelは引き続き `/public` には置かず、ブラウザは認証後に `/api/schedule` のJSONだけを取得します。
