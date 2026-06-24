@@ -27,7 +27,7 @@ export async function readUploadedSchedule(): Promise<ScheduleResponse | null> {
   if (!token) return null;
 
   try {
-    const blob = await get(CURRENT_SCHEDULE_PATH, { token });
+    const blob = await get(CURRENT_SCHEDULE_PATH, { access: 'private', token });
     const stream = (blob as { stream?: ReadableStream<Uint8Array> | null }).stream;
     if (!stream) return null;
     return JSON.parse(await streamToText(stream)) as ScheduleResponse;
