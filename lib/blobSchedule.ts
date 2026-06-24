@@ -3,8 +3,8 @@ import type { ScheduleResponse } from './types';
 
 const CURRENT_SCHEDULE_PATH = 'schedule/current-schedule.json';
 
-function hasBlobToken(): boolean {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+function getBlobToken(): string | undefined {
+  return process.env.BLOB_READ_WRITE_TOKEN;
 }
 
 async function streamToText(stream: ReadableStream<Uint8Array>): Promise<string> {
@@ -23,10 +23,11 @@ async function streamToText(stream: ReadableStream<Uint8Array>): Promise<string>
 }
 
 export async function readUploadedSchedule(): Promise<ScheduleResponse | null> {
-  if (!hasBlobToken()) return null;
+  const token = getBlobToken();
+  if (!token) return null;
 
   try {
-    const blob = await get(CURRENT_SCHEDULE_PATH);
+    const blob = await get(CURRENT_SCHEDULE_PATH, { token });
     const stream = (blob as { stream?: ReadableStream<Uint8Array> | null }).stream;
     if (!stream) return null;
     return JSON.parse(await streamToText(stream)) as ScheduleResponse;
@@ -39,7 +40,8 @@ export async function readUploadedSchedule(): Promise<ScheduleResponse | null> {
 }
 
 export async function writeUploadedSchedule(schedule: ScheduleResponse): Promise<void> {
-  if (!hasBlobToken()) {
+  const token = getBlobToken();
+  if (!token) {
     throw new Error('BLOB_READ_WRITE_TOKEN が設定されていません。VercelでBlob Storeを作成し、このプロジェクトに接続してください。');
   }
 
@@ -48,5 +50,6 @@ export async function writeUploadedSchedule(schedule: ScheduleResponse): Promise
     allowOverwrite: true,
     contentType: 'application/json',
     cacheControlMaxAge: 0,
+    token,
   });
 }
