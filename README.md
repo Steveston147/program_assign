@@ -36,7 +36,11 @@ Route HandlerはNode.js runtimeで動作し、サーバー側で `fs` と `path`
 2. VercelのEnvironment Variablesに `APP_PASSWORD` と `AUTH_COOKIE_SECRET` を必ず設定します。
 3. `data/schedule.seed.json` と `scripts/create-sample-schedule.mjs` がリポジトリに含まれていることを確認します。実際の運用Excelを使う場合は、Vercelビルド前に `data/schedule.xlsx` を別途配置します。
 4. `npm run build` の `prebuild` で、`data/schedule.xlsx` が存在しない場合はサンプルExcelを自動生成します。
+<<<<<<< codex/mvp
+5. Vercelでは `next.config.mjs` を使います。`outputFileTracingIncludes` により `/api/schedule` 実行環境へ `./data/schedule.xlsx` が含まれる構成です。
+=======
 5. `next.config.ts` の `outputFileTracingIncludes` により `/api/schedule` 実行環境へ `./data/schedule.xlsx` が含まれる構成です。
+>>>>>>> main
 
 ## Vercel本番環境での確認項目
 
@@ -141,3 +145,11 @@ MVPでは、`npm run dev` または `npm run build` の前に `scripts/create-sa
 本番運用では、田中さんが更新した実際のExcelを `data/schedule.xlsx` として別途配置・差し替えしてください。サンプル生成は、ファイルが存在しない場合のMVP起動補助です。
 
 `data/schedule.xlsx` はサーバー側Route Handlerが読むためのファイルです。セキュリティ上、`/public` には絶対に置かないでください。ブラウザはExcel本体を直接読み込まず、認証済みの場合だけ `/api/schedule` のJSONを取得します。
+<<<<<<< codex/mvp
+
+
+## Next.js設定ファイル
+
+Vercelでは `next.config.ts` がサポートされない環境があるため、このMVPでは `next.config.mjs` を使用します。TypeScript型注釈は使わず、JSDocの `/** @type {import('next').NextConfig} */` で型を示しています。`outputFileTracingIncludes` の設定は維持し、`/api/schedule` がサーバー実行環境で `data/schedule.xlsx` を読める構成にしています。
+=======
+>>>>>>> main
