@@ -6,6 +6,11 @@ import { sortByStartTime } from './time';
 
 const REQUIRED = ['Date','StaffName','StartTime','EndTime','ProgramName','GatheringPlace','EventName','Status'];
 
+function isMissingOrInaccessibleWorkbookError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /Cannot access file|ENOENT|EACCES|EPERM|no such file or directory/i.test(message);
+}
+
 function loadSeedWorkbook(): XLSX.WorkBook {
   const seedFile = path.join(process.cwd(), 'data', 'schedule.seed.json');
   if (!fs.existsSync(seedFile)) {
@@ -30,7 +35,11 @@ export function loadScheduleWorkbook(): XLSX.WorkBook {
   try {
     return XLSX.readFile(file, { cellDates: true });
   } catch (error) {
-    console.error('schedule.xlsx read failed; falling back to seed data', error);
+    if (!isMissingOrInaccessibleWorkbookError(error)) {
+      throw error;
+    }
+
+    console.error('schedule.xlsx is missing or inaccessible; falling back to seed data', error);
     return loadSeedWorkbook();
   }
 }
