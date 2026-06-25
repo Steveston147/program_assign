@@ -7,6 +7,11 @@ function getBlobToken(): string | undefined {
   return process.env.BLOB_READ_WRITE_TOKEN;
 }
 
+function blobOptions(): { access: 'private'; token?: string } {
+  const token = getBlobToken();
+  return token ? { access: 'private', token } : { access: 'private' };
+}
+
 async function streamToText(stream: ReadableStream<Uint8Array>): Promise<string> {
   const reader = stream.getReader();
   const decoder = new TextDecoder();
@@ -23,33 +28,32 @@ async function streamToText(stream: ReadableStream<Uint8Array>): Promise<string>
 }
 
 export async function readUploadedSchedule(): Promise<ScheduleResponse | null> {
-  const token = getBlobToken();
-  if (!token) return null;
-
   try {
-    const blob = await get(CURRENT_SCHEDULE_PATH, { access: 'private', token });
+    const blob = await get(CURRENT_SCHEDULE_PATH, blobOptions());
     const stream = (blob as { stream?: ReadableStream<Uint8Array> | null }).stream;
     if (!stream) return null;
     return JSON.parse(await streamToText(stream)) as ScheduleResponse;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (/not found|404/i.test(message)) return null;
+    if (/not found|404|No store found|BLOB_STORE_ID/i.test(message)) return null;
     console.error('uploaded schedule read failed', error);
     return null;
   }
 }
 
 export async function writeUploadedSchedule(schedule: ScheduleResponse): Promise<void> {
-  const token = getBlobToken();
-  if (!token) {
-    throw new Error('BLOB_READ_WRITE_TOKEN が設定されていません。VercelでBlob Storeを作成し、このプロジェクトに接続してください。');
+  try {
+    await put(CURRENT_SCHEDULE_PATH, JSON.stringify(schedule, null, 2), {
+      ...blobOptions(),
+      allowOverwrite: true,
+      contentType: 'application/json',
+      cacheControlMaxAge: 0,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (/No store found|BLOB_STORE_ID|BLOB_READ_WRITE_TOKEN|token|store/i.test(message)) {
+      throw new Error('Vercel Blob Store がこのプロジェクトに接続されていません。Storageでprogram-assignに接続し、Redeployしてから再度アップロードしてください。');
+    }
+    throw error;
   }
-
-  await put(CURRENT_SCHEDULE_PATH, JSON.stringify(schedule, null, 2), {
-    access: 'private',
-    allowOverwrite: true,
-    contentType: 'application/json',
-    cacheControlMaxAge: 0,
-    token,
-  });
 }
