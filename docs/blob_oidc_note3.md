@@ -1,0 +1,1 @@
+Vercel Blob Store connection note.
