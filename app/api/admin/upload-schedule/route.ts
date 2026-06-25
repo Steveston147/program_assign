@@ -2,7 +2,7 @@ import * as XLSX from 'xlsx';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getAuthCookieName, verifyAuthCookieValue } from '@/lib/auth';
-import { readAppDataSheet, readStaffMaster } from '@/lib/excel';
+import { ExcelValidationError, readAppDataSheet, readStaffMaster } from '@/lib/excel';
 import { buildScheduleResponse } from '@/lib/schedule';
 import { writeUploadedSchedule } from '@/lib/blobSchedule';
 
@@ -52,9 +52,16 @@ export async function POST(request: Request) {
       { headers: noStore },
     );
   } catch (error) {
-    console.error('schedule upload error', error);
+    if (error instanceof ExcelValidationError) {
+      return NextResponse.json(
+        { error: error.message, details: error.details },
+        { status: 400, headers: noStore },
+      );
+    }
+
+    console.error('schedule upload unexpected error', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Excelアップロードに失敗しました。' },
+      { error: 'Excelアップロードに失敗しました。時間をおいて再度お試しください。' },
       { status: 500, headers: noStore },
     );
   }
