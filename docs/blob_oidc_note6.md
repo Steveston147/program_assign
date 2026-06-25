@@ -1,0 +1,1 @@
+Connected Blob Store configuration note.
