@@ -1,0 +1,1 @@
+Blob Store connection uses Vercel project environment variables.
