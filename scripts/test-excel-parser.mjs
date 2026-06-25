@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 
 const REQUIRED = ['Date','StaffName','StartTime','EndTime','ProgramName','GatheringPlace','EventName','Status'];
+const SCHEDULE_INPUT_COLUMNS = [...REQUIRED, 'GatheringTime'];
 
 function excelSerialToDateParts(serial) {
   // Matches Excel/xlsx calendar-date serial handling for modern dates.
@@ -46,11 +47,24 @@ assert.equal(parseExcelTime('9:00'), '09:00');
 assert.equal(parseExcelTime('09:00:00'), '09:00');
 assert.equal(parseExcelTime(0.375), '09:00');
 
+function isBlank(value) {
+  return value === null || value === undefined || String(value).trim() === '';
+}
+
+function isBlankScheduleRow(row) {
+  return SCHEDULE_INPUT_COLUMNS.every((column) => isBlank(row[column]));
+}
+
 const rows = [
   { Date: '2026-06-29', StaffName: 'A', StartTime: '09:00', EndTime: '10:00', ProgramName: 'P', GatheringPlace: 'G', EventName: 'E', Status: '予定' },
+  { Date: '', StaffName: '', StartTime: '', EndTime: '', ProgramName: '', GatheringPlace: '', EventName: '', Status: '', GatheringTime: '' },
+  { Date: ' ', StaffName: '   ', StartTime: '\t', EndTime: ' ', ProgramName: ' ', GatheringPlace: ' ', EventName: ' ', Status: ' ', GatheringTime: ' ' },
+  { Date: null, StaffName: undefined, StartTime: null, EndTime: undefined, ProgramName: null, GatheringPlace: undefined, EventName: null, Status: undefined, GatheringTime: null },
   { Date: '', StaffName: '', StartTime: '', EndTime: '', ProgramName: '', GatheringPlace: '', EventName: '', Status: '' },
+  { Date: '2026-06-29', StaffName: 'A', StartTime: '09:00', EndTime: '10:00', ProgramName: '', GatheringPlace: 'G', EventName: 'E', Status: '予定' },
 ];
-const dataRows = rows.filter((row) => !REQUIRED.every((column) => String(row[column] ?? '').trim() === ''));
-assert.equal(dataRows.length, 1, 'blank row should be skipped');
+const dataRows = rows.filter((row) => !isBlankScheduleRow(row));
+assert.equal(dataRows.length, 2, 'blank schedule rows should be skipped while partial rows remain');
+assert.equal(dataRows[1].ProgramName, '', 'partial rows should still be validated later');
 
 console.log('excel parser sample cases passed');

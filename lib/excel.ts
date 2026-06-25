@@ -5,6 +5,7 @@ import type { ScheduleItem, Staff } from './types';
 import { sortByStartTime } from './time';
 
 const REQUIRED = ['Date','StaffName','StartTime','EndTime','ProgramName','GatheringPlace','EventName','Status'];
+const SCHEDULE_INPUT_COLUMNS = [...REQUIRED, 'GatheringTime'];
 
 type ValidationDetail = {
   row: number;
@@ -170,8 +171,8 @@ function rowNumber(row: Record<string, unknown>, index: number): number {
   return typeof sourceRow === 'number' ? sourceRow + 1 : index + 2;
 }
 
-function rowIsCompletelyBlank(row: Record<string, unknown>): boolean {
-  return Object.values(row).every(isBlank);
+function isBlankScheduleRow(row: Record<string, unknown>): boolean {
+  return SCHEDULE_INPUT_COLUMNS.every((column) => isBlank(row[column]));
 }
 
 function addRequiredStringError(details: ValidationDetail[], row: Record<string, unknown>, column: string, rowNum: number): void {
@@ -217,7 +218,7 @@ export function readAppDataSheet(workbook = loadScheduleWorkbook()): ScheduleIte
   if (!sheet) throw new Error('App_Data シートが存在しません');
 
   validateRequiredColumns(headers(sheet));
-  const data = rows(sheet).filter((r) => !rowIsCompletelyBlank(r));
+  const data = rows(sheet).filter((r) => !isBlankScheduleRow(r));
   const validationDetails = data.flatMap((r, index) => validateRow(r, rowNumber(r, index)));
   if (validationDetails.length) throw new ExcelValidationError(validationDetails);
 
