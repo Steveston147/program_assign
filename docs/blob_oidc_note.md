@@ -1,0 +1,1 @@
+Blob store is connected through Vercel project environment variables.
