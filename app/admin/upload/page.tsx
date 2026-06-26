@@ -29,7 +29,10 @@ export default function UploadSchedulePage() {
       const json = await res.json();
 
       if (!res.ok) {
-        setError(json.error || 'アップロードに失敗しました。');
+        const details = Array.isArray(json.details)
+          ? json.details.map((detail: { message?: string }) => detail.message).filter(Boolean)
+          : [];
+        setError(details.length ? details.join('\n') : json.error || 'アップロードに失敗しました。');
         setLoading(false);
         return;
       }
@@ -74,7 +77,7 @@ export default function UploadSchedulePage() {
             </button>
 
             {message && <div className="rounded border border-green-300 bg-green-50 p-4 text-green-800">{message}</div>}
-            {error && <div className="rounded border border-red-300 bg-red-50 p-4 text-red-800">{error}</div>}
+            {error && <div className="whitespace-pre-line rounded border border-red-300 bg-red-50 p-4 text-red-800">{error}</div>}
           </div>
         </section>
 
