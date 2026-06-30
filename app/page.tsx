@@ -72,7 +72,7 @@ export default function Page() {
       <div className="mx-auto max-w-7xl space-y-5">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold">職員スケジュール管理</h1>
+            <h1 className="text-2xl font-bold">留学サポートデスク・スケジュール管理</h1>
             <p className="text-sm text-gray-600">
               Excel読込状態: {loading ? '読込中' : error ? 'エラー' : '読込済み'} / 最終更新: {data?.updatedAt || '未設定'}
             </p>
@@ -106,7 +106,7 @@ export default function Page() {
             </section>
             <section className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-xl font-bold">{selected} の職員別予定</h2>
+                <h2 className="text-xl font-bold">{selected} の社員別予定</h2>
                 <div className="no-print inline-flex rounded-lg border bg-white p-1 shadow-sm">
                   <button
                     type="button"
