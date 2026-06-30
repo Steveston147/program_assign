@@ -1,4 +1,5 @@
 import type { ScheduleItem, Staff } from '@/lib/types';
+import { getProgramColorStyles } from '@/lib/programColors';
 import { parseTimeToMinutes, sortByStartTime } from '@/lib/time';
 
 const DAY_START = 7 * 60;
@@ -6,13 +7,6 @@ const DAY_END = 22 * 60;
 const DAY_MINUTES = DAY_END - DAY_START;
 const HOURS = Array.from({ length: 16 }, (_, index) => 7 + index);
 
-const statusBarStyles: Record<string, string> = {
-  '確定': 'border-green-600 bg-green-100 text-green-950',
-  '仮': 'border-gray-600 bg-gray-100 text-gray-950',
-  '確認中': 'border-yellow-600 bg-yellow-100 text-yellow-950',
-  '変更あり': 'border-orange-600 bg-orange-100 text-orange-950',
-  '中止': 'border-red-600 bg-red-100 text-red-950',
-};
 
 type PositionedSchedule = {
   item: ScheduleItem;
@@ -94,13 +88,13 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
                     {row.schedules.map(({ item, left, width, lane }, index) => (
                       <div
                         key={`${item.staffName}-${item.startTime}-${item.endTime}-${item.programName}-${index}`}
-                        className={`absolute overflow-hidden rounded border-l-4 px-2 py-1 text-xs shadow-sm ${statusBarStyles[item.status] || statusBarStyles['仮']}`}
+                        className={`absolute overflow-hidden rounded border-l-4 px-2 py-1 text-xs shadow-sm ${getProgramColorStyles(item.programName)}`}
                         style={{ left: `${left}%`, width: `${width}%`, top: `${0.75 + lane * 3.25}rem` }}
                         title={`${item.startTime}〜${item.endTime} ${item.programName} ${item.eventName}${item.role ? ` / ${item.role}` : ''}`}
                       >
                         <p className="truncate font-bold">{item.startTime}〜{item.endTime}</p>
                         <p className="truncate">{item.programName}</p>
-                        <p className="truncate">{item.eventName}{item.role ? `（${item.role}）` : ''}</p>
+                        <p className="truncate">{item.eventName}{item.role ? `（${item.role}）` : ''} / {item.status}</p>
                       </div>
                     ))}
                   </div>
