@@ -10,6 +10,35 @@ import GanttView from '@/components/GanttView';
 import type { ScheduleResponse } from '@/lib/types';
 import { nearestDate } from '@/lib/utils';
 
+const formatUpdatedAt = (updatedAt?: string) => {
+  if (!updatedAt) return '未設定';
+
+  const date = new Date(updatedAt);
+  if (Number.isNaN(date.getTime())) return '未設定';
+
+  const parts = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    hourCycle: 'h23',
+  }).formatToParts(date);
+
+  const getPart = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value;
+  const year = getPart('year');
+  const month = getPart('month');
+  const day = getPart('day');
+  const hour = getPart('hour');
+  const minute = getPart('minute');
+
+  if (!year || !month || !day || !hour || !minute) return '未設定';
+
+  return `${year}/${month}/${day} ${hour}:${minute}`;
+};
+
 export default function Page() {
   const [data, setData] = useState<ScheduleResponse | null>(null);
   const [error, setError] = useState('');
@@ -74,7 +103,7 @@ export default function Page() {
           <div>
             <h1 className="text-2xl font-bold">留学サポートデスク・スケジュール管理</h1>
             <p className="text-sm text-gray-600">
-              Excel読込状態: {loading ? '読込中' : error ? 'エラー' : '読込済み'} / 最終更新: {data?.updatedAt || '未設定'}
+              Excel読込状態: {loading ? '読込中' : error ? 'エラー' : '読込済み'} / 最終更新: {formatUpdatedAt(data?.updatedAt)}
             </p>
           </div>
           {data && (
