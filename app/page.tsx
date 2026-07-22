@@ -48,7 +48,7 @@ export default function Page() {
   const [data, setData] = useState<ScheduleResponse | null>(null);
   const [error, setError] = useState('');
   const [selected, setSelected] = useState('');
-  const [filters, setFilters] = useState<FilterState>({ staffName: '', programName: '', status: '' });
+  const [filters, setFilters] = useState<FilterState>({ staffName: '', programName: '', status: '', keyword: '' });
   const [viewMode, setViewMode] = useState<'card' | 'gantt'>('card');
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -97,6 +97,9 @@ export default function Page() {
 
   const dayItems = useMemo(() => {
     if (!data) return [];
+
+    const normalizedKeyword = filters.keyword.trim().toLocaleLowerCase('ja-JP');
+
     return data.items
       .filter((i) => i.date === selected)
       .filter(
@@ -104,7 +107,24 @@ export default function Page() {
           (!filters.staffName || i.staffName === filters.staffName) &&
           (!filters.programName || i.programName === filters.programName) &&
           (!filters.status || i.status === filters.status),
-      );
+      )
+      .filter((i) => {
+        if (!normalizedKeyword) return true;
+
+        const searchableText = [
+          i.programName,
+          i.eventName,
+          i.role,
+          i.gatheringPlace,
+          i.destination,
+          i.notes,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLocaleLowerCase('ja-JP');
+
+        return searchableText.includes(normalizedKeyword);
+      });
   }, [data, selected, filters]);
 
   const visibleStaff = data
