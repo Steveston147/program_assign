@@ -82,6 +82,7 @@ export default function Page() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [printedAt, setPrintedAt] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isUrlReady, setIsUrlReady] = useState(false);
 
   async function loadAdminStatus() {
     try {
@@ -116,9 +117,34 @@ export default function Page() {
   }
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const view = params.get('view');
+
+    setSelected(params.get('date') || getTodayInTokyo());
+    setFilters((current) => ({
+      ...current,
+      staffName: params.get('staff') || '',
+      programName: params.get('program') || '',
+    }));
+    setViewMode(view === 'gantt' ? 'gantt' : 'card');
+    setIsUrlReady(true);
+
     load();
     setPrintedAt(formatPrintTimestamp(new Date()));
   }, []);
+
+  useEffect(() => {
+    if (!isUrlReady || !selected) return;
+
+    const params = new URLSearchParams();
+    params.set('date', selected);
+    if (filters.staffName) params.set('staff', filters.staffName);
+    if (filters.programName) params.set('program', filters.programName);
+    if (viewMode === 'gantt') params.set('view', 'gantt');
+
+    const nextUrl = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
+    window.history.replaceState(null, '', nextUrl);
+  }, [isUrlReady, selected, filters.staffName, filters.programName, viewMode]);
 
   async function logout() {
     await fetch('/api/logout', { method: 'POST' });
