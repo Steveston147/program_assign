@@ -29,6 +29,15 @@ function toPercent(minutes: number) {
   return ((minutes - DAY_START) / DAY_MINUTES) * 100;
 }
 
+function formatDuration(totalMinutes: number) {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours === 0) return `${minutes}分`;
+  if (minutes === 0) return `${hours}時間`;
+  return `${hours}時間${minutes}分`;
+}
+
 function buildRows(items: ScheduleItem[], staff: Staff[]) {
   const byStaff = new Map<string, ScheduleItem[]>();
   items.forEach((item) => byStaff.set(item.staffName, [...(byStaff.get(item.staffName) || []), item]));
@@ -62,7 +71,12 @@ function buildRows(items: ScheduleItem[], staff: Staff[]) {
       } satisfies PositionedSchedule;
     });
 
-    return { staffName, schedules, laneCount: Math.max(1, laneEnds.length) };
+    return {
+      staffName,
+      schedules,
+      laneCount: Math.max(1, laneEnds.length),
+      totalMinutes: schedules.reduce((total, schedule) => total + schedule.durationMinutes, 0),
+    };
   });
 }
 
@@ -100,7 +114,12 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
               <div className="divide-y">
                 {rows.map((row) => (
                   <div key={row.staffName} className="grid grid-cols-[10rem_1fr]">
-                    <div className="sticky left-0 z-[5] flex items-center border-r bg-gray-50 p-3 font-semibold shadow-[2px_0_4px_rgba(0,0,0,0.06)]">{row.staffName}</div>
+                    <div className="sticky left-0 z-[5] flex flex-col justify-center border-r bg-gray-50 p-3 shadow-[2px_0_4px_rgba(0,0,0,0.06)]">
+                      <span className="font-semibold">{row.staffName}</span>
+                      <span className="mt-1 text-xs font-normal text-gray-500">
+                        {row.schedules.length}件・{formatDuration(row.totalMinutes)}
+                      </span>
+                    </div>
                     <div className="relative bg-white" style={{ minHeight: `${row.laneCount * 3.25 + 1}rem` }}>
                       {HOURS.map((hour) => (
                         <div
