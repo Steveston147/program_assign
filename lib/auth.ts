@@ -72,6 +72,11 @@ export function verifyAdminAuthCookieValue(value?: string): boolean {
   return verifyRoleCookieValue(value, 'admin');
 }
 
+export async function clearAdminAuthCookie(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete(getAdminAuthCookieName());
+}
+
 export async function clearAuthCookies(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(getAuthCookieName());
