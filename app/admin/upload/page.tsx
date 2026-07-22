@@ -118,19 +118,25 @@ export default function UploadSchedulePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-4 md:p-6">
-      <div className="mx-auto max-w-3xl space-y-5">
-        <header className="flex flex-wrap items-center justify-between gap-3">
+    <main className="min-h-screen bg-slate-50 pb-12 text-slate-900">
+      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-7">
           <div>
-            <h1 className="text-2xl font-bold">Excelアップロード</h1>
-            <p className="text-sm text-gray-600">管理者だけがスケジュールデータを更新できます。</p>
+            <p className="text-xs font-bold tracking-[.18em] text-indigo-600">ONESTOP</p>
+            <h1 className="text-xl font-black">Program Assign</h1>
+            <p className="text-xs text-slate-500">Ritsumeikan Study Abroad Centre</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <a className="rounded border bg-white px-4 py-2" href="/">スケジュールへ戻る</a>
+            <a
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+              href="/"
+            >
+              スケジュールへ戻る
+            </a>
             {!checking && isAdmin && (
               <button
                 type="button"
-                className="rounded border bg-white px-4 py-2 disabled:opacity-50"
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
                 onClick={adminLogout}
                 disabled={loading}
               >
@@ -138,18 +144,26 @@ export default function UploadSchedulePage() {
               </button>
             )}
           </div>
-        </header>
+        </div>
+      </header>
 
-        {checking && <section className="rounded-lg border bg-white p-5 shadow-sm">管理者認証を確認中...</section>}
+      <div className="mx-auto max-w-3xl space-y-5 px-4 py-6 sm:px-7">
+        <section className="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+          <p className="text-xs font-bold tracking-[.14em] text-indigo-600">ADMIN</p>
+          <h2 className="mt-1 text-2xl font-black">Excelアップロード</h2>
+          <p className="mt-1 text-sm text-slate-600">管理者だけがスケジュールデータを更新できます。</p>
+        </section>
+
+        {checking && <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">管理者認証を確認中...</section>}
 
         {!checking && !isAdmin && (
-          <section className="rounded-lg border bg-white p-5 shadow-sm">
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <form className="space-y-4" onSubmit={adminLogin}>
               <div>
                 <label className="mb-2 block text-sm font-bold" htmlFor="admin-password">管理者パスワード</label>
                 <input
                   id="admin-password"
-                  className="block w-full rounded border bg-white p-3"
+                  className="block w-full rounded-lg border border-slate-300 bg-white p-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
@@ -157,7 +171,7 @@ export default function UploadSchedulePage() {
                   required
                 />
               </div>
-              <button className="rounded bg-gray-900 px-5 py-3 font-bold text-white disabled:opacity-50" disabled={loading}>
+              <button className="rounded-lg bg-slate-900 px-5 py-3 font-bold text-white transition hover:bg-slate-800 disabled:opacity-50" disabled={loading}>
                 {loading ? '認証中...' : '管理者としてログイン'}
               </button>
             </form>
@@ -166,12 +180,12 @@ export default function UploadSchedulePage() {
 
         {!checking && isAdmin && (
           <>
-            <section className="rounded-lg border bg-white p-5 shadow-sm">
+            <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="space-y-4">
                 <div>
                   <label className="mb-2 block text-sm font-bold">Excelファイル（.xlsx）</label>
                   <input
-                    className="block w-full rounded border bg-white p-3"
+                    className="block w-full rounded-lg border border-slate-300 bg-white p-3"
                     type="file"
                     accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     onChange={(event) => setFile(event.target.files?.[0] || null)}
@@ -179,18 +193,18 @@ export default function UploadSchedulePage() {
                 </div>
 
                 <button
-                  className="rounded bg-gray-900 px-5 py-3 font-bold text-white disabled:opacity-50"
+                  className="rounded-lg bg-slate-900 px-5 py-3 font-bold text-white transition hover:bg-slate-800 disabled:opacity-50"
                   onClick={upload}
                   disabled={loading}
                 >
                   {loading ? 'アップロード中...' : 'アップロードして反映'}
                 </button>
 
-                {message && <div className="rounded border border-green-300 bg-green-50 p-4 text-green-800">{message}</div>}
+                {message && <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-4 text-emerald-800">{message}</div>}
               </div>
             </section>
 
-            <section className="rounded-lg border bg-white p-5 text-sm leading-6 shadow-sm">
+            <section className="rounded-xl border border-slate-200 bg-white p-5 text-sm leading-6 shadow-sm">
               <h2 className="mb-2 font-bold">入力ルール</h2>
               <p>シート名と1行目の英語ヘッダーは変更しないでください。</p>
               <ul className="mt-2 list-disc pl-5">
@@ -202,7 +216,7 @@ export default function UploadSchedulePage() {
           </>
         )}
 
-        {error && <div className="whitespace-pre-line rounded border border-red-300 bg-red-50 p-4 text-red-800">{error}</div>}
+        {error && <div className="whitespace-pre-line rounded-lg border border-rose-300 bg-rose-50 p-4 text-rose-800">{error}</div>}
       </div>
     </main>
   );
