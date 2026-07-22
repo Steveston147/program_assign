@@ -178,20 +178,45 @@ export default function Page() {
             <section className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-xl font-black text-slate-900">{selected} の社員別予定</h2>
-                <div className="no-print inline-flex rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+                <div
+                  className="no-print inline-flex rounded-xl border border-slate-200 bg-slate-100 p-1 shadow-sm"
+                  role="group"
+                  aria-label="予定の表示形式"
+                >
                   <button
                     type="button"
-                    className={`rounded-md px-4 py-2 text-sm font-semibold ${viewMode === 'card' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+                    aria-pressed={viewMode === 'card'}
+                    className={`inline-flex min-h-10 items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${
+                      viewMode === 'card'
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                    }`}
                     onClick={() => setViewMode('card')}
                   >
-                    カード表示
+                    <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 fill-current">
+                      <rect x="2" y="2" width="7" height="7" rx="1.5" />
+                      <rect x="11" y="2" width="7" height="7" rx="1.5" />
+                      <rect x="2" y="11" width="7" height="7" rx="1.5" />
+                      <rect x="11" y="11" width="7" height="7" rx="1.5" />
+                    </svg>
+                    カード
                   </button>
                   <button
                     type="button"
-                    className={`rounded-md px-4 py-2 text-sm font-semibold ${viewMode === 'gantt' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+                    aria-pressed={viewMode === 'gantt'}
+                    className={`inline-flex min-h-10 items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${
+                      viewMode === 'gantt'
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                    }`}
                     onClick={() => setViewMode('gantt')}
                   >
-                    ガント表示
+                    <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 fill-current">
+                      <rect x="2" y="3" width="10" height="3" rx="1.5" />
+                      <rect x="6" y="8.5" width="12" height="3" rx="1.5" />
+                      <rect x="3" y="14" width="9" height="3" rx="1.5" />
+                    </svg>
+                    ガント
                   </button>
                 </div>
               </div>
