@@ -2,10 +2,10 @@ import type { ScheduleItem, Staff } from '@/lib/types';
 import { getProgramColorStyles } from '@/lib/programColors';
 import { parseTimeToMinutes, sortByStartTime } from '@/lib/time';
 
-const DAY_START = 7 * 60;
-const DAY_END = 22 * 60;
+const DAY_START = 8 * 60;
+const DAY_END = 18 * 60;
 const DAY_MINUTES = DAY_END - DAY_START;
-const HOURS = Array.from({ length: 16 }, (_, index) => 7 + index);
+const HOURS = Array.from({ length: 11 }, (_, index) => 8 + index);
 const SHORT_SCHEDULE_MINUTES = 60;
 
 type PositionedSchedule = {
@@ -108,7 +108,10 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
                           title={`${item.startTime}〜${item.endTime} ${item.programName} ${item.eventName}${item.role ? ` / ${item.role}` : ''} / ${item.status}`}
                         >
                           {isShortSchedule ? (
-                            <p className="truncate font-semibold leading-5">{item.eventName}</p>
+                            <>
+                              <p className="truncate font-bold">{item.startTime}</p>
+                              <p className="truncate font-semibold">{item.eventName}</p>
+                            </>
                           ) : (
                             <>
                               <p className="truncate font-bold">{item.startTime}〜{item.endTime}</p>
