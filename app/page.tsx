@@ -83,6 +83,7 @@ export default function Page() {
   const [printedAt, setPrintedAt] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isUrlReady, setIsUrlReady] = useState(false);
+  const [shareStatus, setShareStatus] = useState<'idle' | 'copied' | 'error'>('idle');
 
   async function loadAdminStatus() {
     try {
@@ -155,6 +156,33 @@ export default function Page() {
   function printSchedule() {
     setPrintedAt(formatPrintTimestamp(new Date()));
     window.setTimeout(() => window.print(), 0);
+  }
+
+  async function copyShareLink() {
+    try {
+      const url = window.location.href;
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = url;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        const copied = document.execCommand('copy');
+        document.body.removeChild(textarea);
+        if (!copied) throw new Error('Copy failed');
+      }
+
+      setShareStatus('copied');
+    } catch {
+      setShareStatus('error');
+    }
+
+    window.setTimeout(() => setShareStatus('idle'), 2500);
   }
 
   const activeFilterValues = [filters.staffName, filters.programName, filters.status, filters.keyword.trim()].filter(Boolean);
@@ -343,6 +371,28 @@ export default function Page() {
                       印刷
                     </button>
                   )}
+                  <button
+                    type="button"
+                    className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-4 py-2 text-sm font-bold shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${
+                      shareStatus === 'copied'
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                        : shareStatus === 'error'
+                          ? 'border-rose-300 bg-rose-50 text-rose-700'
+                          : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                    }`}
+                    onClick={copyShareLink}
+                    aria-live="polite"
+                  >
+                    <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 fill-current">
+                      <path d="M7.5 4.5A2.5 2.5 0 0 1 10 2h5.5A2.5 2.5 0 0 1 18 4.5V10a2.5 2.5 0 0 1-2.5 2.5H14v-1.75h1.5a.75.75 0 0 0 .75-.75V4.5a.75.75 0 0 0-.75-.75H10a.75.75 0 0 0-.75.75V6H7.5V4.5Z" />
+                      <path d="M4.5 7.5H10A2.5 2.5 0 0 1 12.5 10v5.5A2.5 2.5 0 0 1 10 18H4.5A2.5 2.5 0 0 1 2 15.5V10a2.5 2.5 0 0 1 2.5-2.5Zm0 1.75a.75.75 0 0 0-.75.75v5.5c0 .414.336.75.75.75H10a.75.75 0 0 0 .75-.75V10a.75.75 0 0 0-.75-.75H4.5Z" />
+                    </svg>
+                    {shareStatus === 'copied'
+                      ? 'コピーしました'
+                      : shareStatus === 'error'
+                        ? 'コピーできませんでした'
+                        : '共有リンクをコピー'}
+                  </button>
                   <div
                     className="inline-flex rounded-xl border border-slate-200 bg-slate-100 p-1 shadow-sm"
                     role="group"
