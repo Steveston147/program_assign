@@ -30,7 +30,7 @@ export default function StaffCard({
             {schedules.map((schedule, index) => (
               <article
                 key={`${schedule.staffName}-${schedule.startTime}-${index}`}
-                className={`rounded-lg border border-slate-200 border-l-4 p-3 shadow-sm ${getProgramColorStyles(schedule.programName)}`}
+                className={`print-schedule rounded-lg border border-slate-200 border-l-4 p-3 shadow-sm ${getProgramColorStyles(schedule.programName)}`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <p className="font-bold tabular-nums text-slate-900">
