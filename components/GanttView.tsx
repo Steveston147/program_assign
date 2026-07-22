@@ -81,11 +81,11 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
         {items.length === 0 ? (
           <p className="rounded border border-dashed p-6 text-center text-gray-500">この日付・条件に一致する予定はありません。</p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="max-h-[70vh] overflow-auto rounded border border-gray-200">
             <div className="min-w-[980px]">
-              <div className="grid grid-cols-[10rem_1fr] border-b text-xs font-semibold text-gray-600">
-                <div className="p-2">職員名</div>
-                <div className="relative h-10">
+              <div className="sticky top-0 z-10 grid grid-cols-[10rem_1fr] border-b bg-white text-xs font-semibold text-gray-600 shadow-sm">
+                <div className="border-r bg-gray-50 p-2">職員名</div>
+                <div className="relative h-10 bg-white">
                   {HOURS.map((hour) => (
                     <div
                       key={hour}
