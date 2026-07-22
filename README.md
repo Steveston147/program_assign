@@ -1,155 +1,130 @@
-# 職員スケジュール管理 MVP
+# Program Assign
 
-短期留学生受入プログラムの職員6名について、日ごとの「誰が、何時に、どこで、何を担当しているか」を閲覧する内部向けNext.jsアプリです。編集はExcelを田中さんが行い、職員はWeb画面で閲覧のみ行います。
+短期留学生受入プログラムについて、職員ごとの日別スケジュールを共有する内部向けNext.jsアプリです。
+
+「誰が、何時に、どこで、何を担当しているか」を、職員別カード、全体タイムライン、ガント表示で確認できます。予定の編集はExcelで行い、職員はWeb画面から閲覧します。
+
+## 現在の主な機能
+
+- 共有パスワードによるログイン・ログアウト
+- 日付選択、今日・前日・翌日への移動
+- 職員別カード表示（予定なし表示を含む）
+- 全体タイムライン表示
+- ガント表示
+- 職員名・Program名・Statusによる絞り込み
+- Excelファイルのアップロードと入力内容の検証
+- 印刷用表示
+- Excel本体をブラウザへ直接公開しないサーバー側読込
+
+## 通常の運用方法
+
+1. 管理者が所定のExcelファイルを更新します。
+2. アプリへログインします。
+3. トップ画面右上の「Excelアップロード」を開きます。
+4. `.xlsx`ファイルを選択し、「アップロードして反映」を実行します。
+5. 入力内容の検証後、スケジュールデータがVercel Blobへ保存されます。
+6. トップ画面を再読み込みし、予定件数と最終更新日時を確認します。
+
+アップロード済みデータがある場合、アプリはそのデータを優先して表示します。通常の予定更新では、GitHubへのExcel差し替えやVercelの再デプロイは不要です。
+
+## Excelの入力仕様
+
+必須シートは次の2つです。
+
+- `App_Data`
+- `Master_Staff`
+
+`App_Data`の必須列は次のとおりです。
+
+- `Date`
+- `StaffName`
+- `StartTime`
+- `EndTime`
+- `ProgramName`
+- `GatheringPlace`
+- `EventName`
+- `Status`
+
+任意列として、`Role`、`GatheringTime`、`Destination`、`Notes`、`UpdatedAt`を利用できます。
+
+`Master_Staff`がある場合は、`DisplayOrder`の順に職員カードを表示します。シート名と1行目の英語ヘッダーは変更しないでください。
+
+アップロード時には、必須列、必須項目、日付、時刻などを検証します。問題がある場合は保存せず、対象行と内容を画面に表示します。
+
+## データ保存と読込順序
+
+アプリは次の順序でスケジュールデータを読み込みます。
+
+1. Vercel Blobへアップロード済みのスケジュールデータ
+2. `data/schedule.xlsx`
+3. `data/schedule.seed.json`から生成・読込したサンプルデータ
+
+`data/schedule.xlsx`は初期データまたはフォールバック用です。`.gitignore`の対象であり、通常のPRにはExcelバイナリを含めません。
+
+`npm run dev`または`npm run build`の前に、`data/schedule.xlsx`が存在しない場合は、`scripts/create-sample-schedule.mjs`が`data/schedule.seed.json`からサンプルExcelを生成します。
+
+## Excel本体を公開しない理由
+
+Excelは`public`配下に置きません。`public`配下のファイルは、URLを知っていれば直接アクセスされる可能性があるためです。
+
+アプリはサーバー側でExcelを読み込み、認証済みユーザーに`/api/schedule`経由でJSONのみを返します。未認証または不正なCookieの場合は401を返し、レスポンスには`Cache-Control: no-store`を設定しています。
+
+アップロード後のスケジュールデータは、Vercel Blobのprivate領域へJSONとして保存します。
 
 ## ローカル起動方法
 
 ```bash
 npm install
-cp .env.example .env.local # または下記環境変数を設定
+cp .env.example .env.local
 npm run dev
 ```
 
-必要な環境変数:
+必要な環境変数は次のとおりです。
 
-- `APP_PASSWORD`: 共有ログインパスワード（必須）
-- `AUTH_COOKIE_SECRET`: Cookie署名用の十分長い秘密文字列（必須）
-- `AUTH_COOKIE_NAME`: 任意。未設定時は `staff_schedule_auth`
+- `APP_PASSWORD`：共有ログインパスワード（必須）
+- `AUTH_COOKIE_SECRET`：Cookie署名用の十分長い秘密文字列（必須）
+- `AUTH_COOKIE_NAME`：任意。未設定時は`staff_schedule_auth`
+- `BLOB_READ_WRITE_TOKEN`：Vercel Blob接続時に使用
 
-## Excelファイルの置き場所と更新手順
+## Vercelの設定
 
-Excelは必ず `data/schedule.xlsx` に配置します。`public` には置きません。田中さんがExcelを更新したら、このファイルを差し替えて再デプロイします。
+1. GitHubリポジトリをVercelのNext.jsプロジェクトとして接続します。
+2. Environment Variablesに`APP_PASSWORD`と`AUTH_COOKIE_SECRET`を設定します。
+3. 必要に応じて`AUTH_COOKIE_NAME`を設定します。
+4. Vercel StorageでBlob Storeを作成し、このプロジェクトへ接続します。
+5. 接続後、再デプロイします。
 
-アプリが読む正本シートは `App_Data` のみです。必須列は `Date`, `StaffName`, `StartTime`, `EndTime`, `ProgramName`, `GatheringPlace`, `EventName`, `Status` です。`Master_Staff` がある場合は `DisplayOrder` 順に職員カードを表示します。
+Blob Storeが未接続の場合、Excelアップロード時にエラーを表示します。その場合はVercelのStorage設定を確認してください。
 
-## `/public` にExcelを置かない理由
-
-`public` 配下のファイルはURLを知っていれば直接アクセスされる可能性があります。このMVPではExcel本体をブラウザに渡さず、認証済みユーザーだけが `/api/schedule` 経由でJSONを取得します。
-
-## `/api/schedule` の仕組み
-
-Route HandlerはNode.js runtimeで動作し、サーバー側で `fs` と `path` を使って `data/schedule.xlsx` を読み込みます。`xlsx` はサーバー側の `lib/excel.ts` でのみ使用し、レスポンスにはJSONだけを返します。未認証または不正Cookieの場合は401を返し、レスポンスには `Cache-Control: no-store` を付けています。
-
-## Vercelデプロイ方法
-
-1. GitHub等にpushし、VercelでNext.jsプロジェクトとしてimportします。
-2. VercelのEnvironment Variablesに `APP_PASSWORD` と `AUTH_COOKIE_SECRET` を必ず設定します。
-3. `data/schedule.seed.json` と `scripts/create-sample-schedule.mjs` がリポジトリに含まれていることを確認します。実際の運用Excelを使う場合は、Vercelビルド前に `data/schedule.xlsx` を別途配置します。
-4. `npm run build` の `prebuild` で、`data/schedule.xlsx` が存在しない場合はサンプルExcelを自動生成します。
-<<<<<<< codex/mvp
-5. Vercelでは `next.config.mjs` を使います。`outputFileTracingIncludes` により `/api/schedule` 実行環境へ `./data/schedule.xlsx` が含まれる構成です。
-=======
-5. `next.config.ts` の `outputFileTracingIncludes` により `/api/schedule` 実行環境へ `./data/schedule.xlsx` が含まれる構成です。
->>>>>>> main
-
-## Vercel本番環境での確認項目
-
-- 未ログイン状態で `/api/schedule` が401になる
-- ログイン後に `/api/schedule` がJSONを返す
-- 職員別カードと全体タイムラインが表示される
-- Excelを差し替えて再デプロイすると画面に反映される
-- `/public/schedule.xlsx` のようなExcel本体への直接アクセスが存在しない
-
-## MVPでできること
-
-- 共有パスワードログイン・ログアウト
-- 日付選択、今日・前日・翌日移動
-- 職員別カード表示（予定なし表示を含む）
-- 全体タイムライン表示
-- 職員名・プログラム名・ステータスフィルター
-- Excel日付シリアル値、文字列日付、Excel時刻値、文字列時刻の変換
-- 印刷用CSS（ナビゲーション・フィルターを非表示）
-
-## 今後追加予定の機能
-
-週間表示、月間表示、OneDrive/Google Sheets連携、DB保存、職員別ログイン、編集機能、変更履歴、変更通知、PDF出力、プログラム別表示、今日の担当一覧、現在時刻での担当強調表示。
+`next.config.mjs`の`outputFileTracingIncludes`により、`/api/schedule`の実行環境へ`data/schedule.xlsx`と`data/schedule.seed.json`を含める構成です。
 
 ## 検証コマンド
 
-依存関係を固定しているため、通常のネットワーク環境では以下で検証します。
-
 ```bash
 npm install
 npm run build
 npm run lint
 ```
 
-このCodex環境では、npm registryへのHTTPS CONNECTがプロキシで403になり、`@types/node` などscoped packageを取得できないため `npm install` が完了しませんでした。ローカルまたはVercelでは、上記コマンドが成功することを確認してください。
+## 本番環境の確認項目
 
-## API動作確認手順
+- 未ログイン状態で`/api/schedule`が401を返す
+- 共有パスワードでログインできる
+- ログイン後に職員別カード、タイムライン、ガント表示を確認できる
+- 日付選択と各フィルターが動作する
+- 正常なExcelをアップロードできる
+- 不正なExcelは保存されず、入力エラーが表示される
+- アップロード後に予定件数と最終更新日時が更新される
+- Excel本体へ直接アクセスできるURLが存在しない
 
-ローカル起動後、未ログイン時の401を確認します。
+## 現時点での運用方針
 
-```bash
-curl -i http://localhost:3000/api/schedule
-```
+- Excelを予定編集の正本とします。
+- Webアプリは閲覧とExcelアップロードに使用します。
+- アプリ内での予定編集は行いません。
+- Program Managerなど他の業務アプリとは独立して運用します。
+- 将来はOneStop AI Platformのダッシュボードから本アプリへアクセスできる構成を目指します。
 
-ログイン後にJSONが返ることを確認します。
+## 今後の候補
 
-```bash
-curl -i -c /tmp/staff-cookie.txt \
-  -H 'Content-Type: application/json' \
-  -d '{"password":"YOUR_APP_PASSWORD"}' \
-  http://localhost:3000/api/login
-
-curl -i -b /tmp/staff-cookie.txt http://localhost:3000/api/schedule
-```
-
-レスポンスの `items[].date` が `yyyy-mm-dd`、`items[].startTime` / `items[].endTime` / `items[].gatheringTime` が `HH:mm` になっていることを確認してください。サンプルExcelにはExcel日付シリアル値・時刻シリアル値と文字列日付・時刻の両方を含めています。
-
-## Excel差し替え手順
-
-1. 田中さんがExcelを更新します。
-2. ファイル名を `schedule.xlsx` にして、リポジトリの `data/schedule.xlsx` を置き換えます。
-3. `public` には絶対に置かないでください。
-4. GitにコミットしてVercelへ再デプロイします。
-5. 本番でログイン後、画面の最終更新日時と予定内容が更新されていることを確認します。
-
-## Vercel環境変数
-
-Vercel Project Settings > Environment Variables に以下を設定します。
-
-- `APP_PASSWORD`: 職員共有パスワード
-- `AUTH_COOKIE_SECRET`: Cookie署名用の長いランダム文字列
-- `AUTH_COOKIE_NAME`: 任意。未設定なら `staff_schedule_auth`
-
-Production / Preview / Development の必要な環境に設定し、設定後に再デプロイしてください。
-
-## PR提出前の未完了確認と代替確認手順
-
-Codex環境では npm registry へのアクセスがプロキシ制限により403となるため、以下のコマンドはこの環境内では実行確認が未完了です。
-
-```bash
-npm install
-npm run build
-npm run lint
-npm run dev
-```
-
-PRレビュー時またはマージ前に、ローカル環境、Vercel、またはGitHub Actionsなど npm registry にアクセスできる環境で、必ず上記4コマンドを確認してください。
-
-あわせて、Vercel本番環境では以下を確認してください。
-
-1. Environment Variables に `APP_PASSWORD`、`AUTH_COOKIE_SECRET`、必要に応じて `AUTH_COOKIE_NAME` を設定すること。
-2. `data/schedule.xlsx` はリポジトリの `data` 配下に置き、`public` には絶対に移動しないこと。
-3. 未ログイン状態で `/api/schedule` にアクセスすると401になること。
-4. ログイン後に `/api/schedule` がスケジュールJSONを返すこと。
-5. 画面表示はExcel本体を直接読まず、必ず `/api/schedule` のJSONを利用していること。
-
-## Codex PRでのExcelバイナリ除外
-
-CodexのPRでは `.xlsx` バイナリファイルを差分に含めません。`data/schedule.xlsx` は `.gitignore` で除外し、PRにはテキスト形式の `data/schedule.seed.json` と生成スクリプトだけを含めます。
-
-MVPでは、`npm run dev` または `npm run build` の前に `scripts/create-sample-schedule.mjs` が実行されます。このスクリプトは `data/schedule.seed.json` の `App_Data` と `Master_Staff` からサンプルExcelを生成します。既に `data/schedule.xlsx` が存在する場合は上書きしません。
-
-本番運用では、田中さんが更新した実際のExcelを `data/schedule.xlsx` として別途配置・差し替えしてください。サンプル生成は、ファイルが存在しない場合のMVP起動補助です。
-
-`data/schedule.xlsx` はサーバー側Route Handlerが読むためのファイルです。セキュリティ上、`/public` には絶対に置かないでください。ブラウザはExcel本体を直接読み込まず、認証済みの場合だけ `/api/schedule` のJSONを取得します。
-<<<<<<< codex/mvp
-
-
-## Next.js設定ファイル
-
-Vercelでは `next.config.ts` がサポートされない環境があるため、このMVPでは `next.config.mjs` を使用します。TypeScript型注釈は使わず、JSDocの `/** @type {import('next').NextConfig} */` で型を示しています。`outputFileTracingIncludes` の設定は維持し、`/api/schedule` がサーバー実行環境で `data/schedule.xlsx` を読める構成にしています。
-=======
->>>>>>> main
+週間表示、月間表示、閲覧者とアップロード管理者の権限分離、職員別ログイン、Program別表示、担当重複チェック、現在時刻の担当強調、変更履歴、変更通知、OneDrive・Google Sheets連携、他アプリとのAPI連携などを、必要性を確認しながら小さなPRに分けて追加します。
