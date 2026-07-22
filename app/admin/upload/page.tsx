@@ -54,6 +54,28 @@ export default function UploadSchedulePage() {
     }
   }
 
+  async function adminLogout() {
+    setLoading(true);
+    setMessage('');
+    setError('');
+
+    try {
+      const response = await fetch('/api/admin/logout', { method: 'POST' });
+      if (!response.ok) {
+        const json = await response.json();
+        setError(json.error || '管理者ログアウトに失敗しました。');
+        return;
+      }
+
+      setIsAdmin(false);
+      setFile(null);
+    } catch (logoutError) {
+      setError(logoutError instanceof Error ? logoutError.message : '管理者ログアウトに失敗しました。');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function upload() {
     setLoading(true);
     setMessage('');
@@ -103,7 +125,19 @@ export default function UploadSchedulePage() {
             <h1 className="text-2xl font-bold">Excelアップロード</h1>
             <p className="text-sm text-gray-600">管理者だけがスケジュールデータを更新できます。</p>
           </div>
-          <a className="rounded border bg-white px-4 py-2" href="/">スケジュールへ戻る</a>
+          <div className="flex flex-wrap gap-2">
+            <a className="rounded border bg-white px-4 py-2" href="/">スケジュールへ戻る</a>
+            {!checking && isAdmin && (
+              <button
+                type="button"
+                className="rounded border bg-white px-4 py-2 disabled:opacity-50"
+                onClick={adminLogout}
+                disabled={loading}
+              >
+                管理者ログアウト
+              </button>
+            )}
+          </div>
         </header>
 
         {checking && <section className="rounded-lg border bg-white p-5 shadow-sm">管理者認証を確認中...</section>}
