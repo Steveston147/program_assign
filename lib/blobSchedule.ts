@@ -1,5 +1,5 @@
 import { get, put } from '@vercel/blob';
-import type { ScheduleResponse } from './types';
+import type { ScheduleData } from './types';
 
 const CURRENT_SCHEDULE_PATH = 'schedule/current-schedule.json';
 
@@ -27,12 +27,12 @@ async function streamToText(stream: ReadableStream<Uint8Array>): Promise<string>
   return text;
 }
 
-export async function readUploadedSchedule(): Promise<ScheduleResponse | null> {
+export async function readUploadedSchedule(): Promise<ScheduleData | null> {
   try {
     const blob = await get(CURRENT_SCHEDULE_PATH, blobOptions());
     const stream = (blob as { stream?: ReadableStream<Uint8Array> | null }).stream;
     if (!stream) return null;
-    return JSON.parse(await streamToText(stream)) as ScheduleResponse;
+    return JSON.parse(await streamToText(stream)) as ScheduleData;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (/not found|404|No store found|BLOB_STORE_ID/i.test(message)) return null;
@@ -41,7 +41,7 @@ export async function readUploadedSchedule(): Promise<ScheduleResponse | null> {
   }
 }
 
-export async function writeUploadedSchedule(schedule: ScheduleResponse): Promise<void> {
+export async function writeUploadedSchedule(schedule: ScheduleData): Promise<void> {
   try {
     await put(CURRENT_SCHEDULE_PATH, JSON.stringify(schedule, null, 2), {
       ...blobOptions(),
