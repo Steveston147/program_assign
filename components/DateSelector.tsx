@@ -85,15 +85,23 @@ export default function DateSelector({ dates, selected, onChange }: { dates: str
 
         <button
           type="button"
-          className={`h-10 rounded-lg px-4 text-sm font-bold transition ${
+          aria-label={isToday ? '今日の日付を表示中' : '今日の日付に戻る'}
+          className={`h-10 rounded-lg border px-4 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${
             isToday
-              ? 'bg-indigo-50 text-indigo-500 ring-1 ring-inset ring-indigo-200'
-              : 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-700'
+              ? 'cursor-default border-indigo-200 bg-indigo-50 text-indigo-600'
+              : 'border-indigo-600 bg-indigo-600 text-white shadow-sm hover:bg-indigo-700'
           }`}
           onClick={() => onChange(getTodayInTokyo())}
           disabled={isToday}
         >
-          今日
+          {isToday ? (
+            '今日'
+          ) : (
+            <>
+              <span className="sm:hidden">今日</span>
+              <span className="hidden sm:inline">今日へ戻る</span>
+            </>
+          )}
         </button>
       </div>
       <p className="text-xs text-slate-500">中央の日付を押すと、カレンダーから直接選択できます。</p>
