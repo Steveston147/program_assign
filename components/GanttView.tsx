@@ -1,6 +1,10 @@
+'use client';
+
+import { useCallback, useState } from 'react';
 import type { ScheduleItem, Staff } from '@/lib/types';
 import { getProgramColorStyles } from '@/lib/programColors';
 import { parseTimeToMinutes, sortByStartTime } from '@/lib/time';
+import ScheduleDetailDialog from '@/components/ScheduleDetailDialog';
 
 const DAY_START = 8 * 60;
 const DAY_END = 18 * 60;
@@ -14,6 +18,11 @@ type PositionedSchedule = {
   width: number;
   lane: number;
   durationMinutes: number;
+};
+
+type SelectedSchedule = {
+  item: ScheduleItem;
+  trigger: HTMLButtonElement;
 };
 
 function toPercent(minutes: number) {
@@ -59,81 +68,96 @@ function buildRows(items: ScheduleItem[], staff: Staff[]) {
 
 export default function GanttView({ items, staff }: { items: ScheduleItem[]; staff: Staff[] }) {
   const rows = buildRows(items, staff);
+  const [selectedSchedule, setSelectedSchedule] = useState<SelectedSchedule | null>(null);
+  const closeDetail = useCallback(() => setSelectedSchedule(null), []);
 
   return (
-    <section className="rounded-lg border bg-white p-4 shadow-sm">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xl font-bold">ガント表示</h2>
-        <p className="rounded bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-700">予定件数：{items.length}件</p>
-      </div>
-      {items.length === 0 ? (
-        <p className="rounded border border-dashed p-6 text-center text-gray-500">この日付・条件に一致する予定はありません。</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <div className="min-w-[980px]">
-            <div className="grid grid-cols-[10rem_1fr] border-b text-xs font-semibold text-gray-600">
-              <div className="p-2">職員名</div>
-              <div className="relative h-10">
-                {HOURS.map((hour) => (
-                  <div
-                    key={hour}
-                    className="absolute top-0 h-full border-l border-gray-200 pl-1"
-                    style={{ left: `${((hour * 60 - DAY_START) / DAY_MINUTES) * 100}%` }}
-                  >
-                    {String(hour).padStart(2, '0')}:00
+    <>
+      <section className="rounded-lg border bg-white p-4 shadow-sm">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xl font-bold">ガント表示</h2>
+          <p className="rounded bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-700">予定件数：{items.length}件</p>
+        </div>
+        {items.length === 0 ? (
+          <p className="rounded border border-dashed p-6 text-center text-gray-500">この日付・条件に一致する予定はありません。</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <div className="min-w-[980px]">
+              <div className="grid grid-cols-[10rem_1fr] border-b text-xs font-semibold text-gray-600">
+                <div className="p-2">職員名</div>
+                <div className="relative h-10">
+                  {HOURS.map((hour) => (
+                    <div
+                      key={hour}
+                      className="absolute top-0 h-full border-l border-gray-200 pl-1"
+                      style={{ left: `${((hour * 60 - DAY_START) / DAY_MINUTES) * 100}%` }}
+                    >
+                      {String(hour).padStart(2, '0')}:00
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="divide-y">
+                {rows.map((row) => (
+                  <div key={row.staffName} className="grid grid-cols-[10rem_1fr]">
+                    <div className="flex items-center border-r bg-gray-50 p-3 font-semibold">{row.staffName}</div>
+                    <div className="relative bg-white" style={{ minHeight: `${row.laneCount * 3.25 + 1}rem` }}>
+                      {HOURS.map((hour) => (
+                        <div
+                          key={hour}
+                          className="absolute inset-y-0 border-l border-gray-100"
+                          style={{ left: `${((hour * 60 - DAY_START) / DAY_MINUTES) * 100}%` }}
+                        />
+                      ))}
+                      {row.schedules.map(({ item, left, width, lane, durationMinutes }, index) => {
+                        const isShortSchedule = durationMinutes < SHORT_SCHEDULE_MINUTES;
+
+                        return (
+                          <button
+                            type="button"
+                            key={`${item.staffName}-${item.startTime}-${item.endTime}-${item.programName}-${index}`}
+                            className={`absolute overflow-hidden rounded border-l-4 text-left shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${
+                              isShortSchedule ? 'px-1 py-0.5 text-[11px] leading-tight' : 'px-2 py-1 text-xs'
+                            } ${getProgramColorStyles(item.programName)}`}
+                            style={{ left: `${left}%`, width: `${width}%`, top: `${0.75 + lane * 3.25}rem` }}
+                            title={`${item.startTime}〜${item.endTime} ${item.programName} ${item.eventName}${item.role ? ` / ${item.role}` : ''} / ${item.status}`}
+                            aria-label={`${item.startTime}から${item.endTime}、${item.eventName}の詳細を開く`}
+                            onClick={(event) => setSelectedSchedule({ item, trigger: event.currentTarget })}
+                          >
+                            {isShortSchedule ? (
+                              <>
+                                <span className="block truncate font-bold leading-4">{item.startTime}</span>
+                                <span className="block truncate font-semibold leading-4">{item.eventName}</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="block truncate font-bold">{item.startTime}〜{item.endTime}</span>
+                                <span className="block truncate">{item.programName}</span>
+                                <span className="block truncate">
+                                  {item.eventName}
+                                  {item.role ? `（${item.role}）` : ''} / {item.status}
+                                </span>
+                              </>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="divide-y">
-              {rows.map((row) => (
-                <div key={row.staffName} className="grid grid-cols-[10rem_1fr]">
-                  <div className="flex items-center border-r bg-gray-50 p-3 font-semibold">{row.staffName}</div>
-                  <div className="relative bg-white" style={{ minHeight: `${row.laneCount * 3.25 + 1}rem` }}>
-                    {HOURS.map((hour) => (
-                      <div
-                        key={hour}
-                        className="absolute inset-y-0 border-l border-gray-100"
-                        style={{ left: `${((hour * 60 - DAY_START) / DAY_MINUTES) * 100}%` }}
-                      />
-                    ))}
-                    {row.schedules.map(({ item, left, width, lane, durationMinutes }, index) => {
-                      const isShortSchedule = durationMinutes < SHORT_SCHEDULE_MINUTES;
-
-                      return (
-                        <div
-                          key={`${item.staffName}-${item.startTime}-${item.endTime}-${item.programName}-${index}`}
-                          className={`absolute overflow-hidden rounded border-l-4 shadow-sm ${
-                            isShortSchedule ? 'px-1 py-0.5 text-[11px] leading-tight' : 'px-2 py-1 text-xs'
-                          } ${getProgramColorStyles(item.programName)}`}
-                          style={{ left: `${left}%`, width: `${width}%`, top: `${0.75 + lane * 3.25}rem` }}
-                          title={`${item.startTime}〜${item.endTime} ${item.programName} ${item.eventName}${item.role ? ` / ${item.role}` : ''} / ${item.status}`}
-                        >
-                          {isShortSchedule ? (
-                            <>
-                              <p className="truncate font-bold leading-4">{item.startTime}</p>
-                              <p className="truncate font-semibold leading-4">{item.eventName}</p>
-                            </>
-                          ) : (
-                            <>
-                              <p className="truncate font-bold">{item.startTime}〜{item.endTime}</p>
-                              <p className="truncate">{item.programName}</p>
-                              <p className="truncate">
-                                {item.eventName}
-                                {item.role ? `（${item.role}）` : ''} / {item.status}
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
-        </div>
-      )}
-    </section>
+        )}
+      </section>
+
+      {selectedSchedule ? (
+        <ScheduleDetailDialog
+          item={selectedSchedule.item}
+          onClose={closeDetail}
+          returnFocusTo={selectedSchedule.trigger}
+        />
+      ) : null}
+    </>
   );
 }
