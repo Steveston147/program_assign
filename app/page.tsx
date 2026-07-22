@@ -15,6 +15,8 @@ const sourceLabels: Record<ScheduleDataSource, string> = {
   seed: 'サンプルデータ',
 };
 
+const emptyFilters: FilterState = { staffName: '', programName: '', status: '', keyword: '' };
+
 const formatUpdatedAt = (updatedAt?: string) => {
   if (!updatedAt) return '未設定';
 
@@ -74,11 +76,12 @@ export default function Page() {
   const [data, setData] = useState<ScheduleResponse | null>(null);
   const [error, setError] = useState('');
   const [selected, setSelected] = useState('');
-  const [filters, setFilters] = useState<FilterState>({ staffName: '', programName: '', status: '', keyword: '' });
+  const [filters, setFilters] = useState<FilterState>(emptyFilters);
   const [viewMode, setViewMode] = useState<'card' | 'gantt'>('card');
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [printedAt, setPrintedAt] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   async function loadAdminStatus() {
     try {
@@ -127,6 +130,12 @@ export default function Page() {
     setPrintedAt(formatPrintTimestamp(new Date()));
     window.setTimeout(() => window.print(), 0);
   }
+
+  const activeFilterValues = [filters.staffName, filters.programName, filters.status, filters.keyword.trim()].filter(Boolean);
+  const activeFilterCount = activeFilterValues.length;
+  const filterSummary = activeFilterValues
+    .map((value, index) => (index === activeFilterValues.length - 1 && filters.keyword.trim() === value ? `「${value}」` : value))
+    .join('・');
 
   const dayItems = useMemo(() => {
     if (!data) return [];
@@ -248,15 +257,51 @@ export default function Page() {
             </section>
 
             <section className="no-print rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="flex flex-wrap items-end justify-between gap-4">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <DateSelector dates={data.dates} selected={selected} onChange={setSelected} />
-                <Filters
-                  staff={data.staff.map((s) => s.staffName)}
-                  programs={data.programs}
-                  statuses={data.statuses.length ? data.statuses : ['仮', '確認中', '確定', '変更あり', '中止']}
-                  value={filters}
-                  onChange={setFilters}
-                />
+
+                <div className="w-full lg:w-auto">
+                  <button
+                    type="button"
+                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border border-slate-300 bg-white px-4 py-2 text-left text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 lg:hidden"
+                    aria-expanded={isFilterOpen}
+                    aria-controls="schedule-filters"
+                    onClick={() => setIsFilterOpen((current) => !current)}
+                  >
+                    <span>{isFilterOpen ? '絞り込み条件を閉じる' : '絞り込み条件を表示'}</span>
+                    <span className="flex shrink-0 items-center gap-2 text-xs font-semibold text-slate-500">
+                      {activeFilterCount ? `${activeFilterCount}件適用中` : '条件なし'}
+                      <span aria-hidden="true">{isFilterOpen ? '▲' : '▼'}</span>
+                    </span>
+                  </button>
+
+                  {!isFilterOpen && activeFilterCount > 0 && (
+                    <p className="mt-2 truncate text-sm text-slate-600 lg:hidden" title={filterSummary}>
+                      {filterSummary}
+                    </p>
+                  )}
+
+                  <div id="schedule-filters" className={`${isFilterOpen ? 'mt-4 block' : 'hidden'} lg:mt-0 lg:block`}>
+                    <div className="mb-3 flex items-center justify-between gap-3 lg:hidden">
+                      <p className="text-sm font-bold text-slate-800">絞り込み条件</p>
+                      <button
+                        type="button"
+                        className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-800 disabled:cursor-not-allowed disabled:text-slate-400"
+                        disabled={activeFilterCount === 0}
+                        onClick={() => setFilters(emptyFilters)}
+                      >
+                        条件をクリア
+                      </button>
+                    </div>
+                    <Filters
+                      staff={data.staff.map((s) => s.staffName)}
+                      programs={data.programs}
+                      statuses={data.statuses.length ? data.statuses : ['仮', '確認中', '確定', '変更あり', '中止']}
+                      value={filters}
+                      onChange={setFilters}
+                    />
+                  </div>
+                </div>
               </div>
             </section>
             <section className="space-y-3">
