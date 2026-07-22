@@ -103,14 +103,16 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
                       return (
                         <div
                           key={`${item.staffName}-${item.startTime}-${item.endTime}-${item.programName}-${index}`}
-                          className={`absolute overflow-hidden rounded border-l-4 px-2 py-1 text-xs shadow-sm ${getProgramColorStyles(item.programName)}`}
+                          className={`absolute overflow-hidden rounded border-l-4 shadow-sm ${
+                            isShortSchedule ? 'px-1 py-0.5 text-[11px] leading-tight' : 'px-2 py-1 text-xs'
+                          } ${getProgramColorStyles(item.programName)}`}
                           style={{ left: `${left}%`, width: `${width}%`, top: `${0.75 + lane * 3.25}rem` }}
                           title={`${item.startTime}〜${item.endTime} ${item.programName} ${item.eventName}${item.role ? ` / ${item.role}` : ''} / ${item.status}`}
                         >
                           {isShortSchedule ? (
                             <>
-                              <p className="truncate font-bold">{item.startTime}</p>
-                              <p className="truncate font-semibold">{item.eventName}</p>
+                              <p className="truncate font-bold leading-4">{item.startTime}</p>
+                              <p className="truncate font-semibold leading-4">{item.eventName}</p>
                             </>
                           ) : (
                             <>
