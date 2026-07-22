@@ -51,6 +51,17 @@ export default function Page() {
   const [filters, setFilters] = useState<FilterState>({ staffName: '', programName: '', status: '' });
   const [viewMode, setViewMode] = useState<'card' | 'gantt'>('card');
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  async function loadAdminStatus() {
+    try {
+      const response = await fetch('/api/admin/status', { cache: 'no-store' });
+      const json = await response.json();
+      setIsAdmin(Boolean(json.isAdmin));
+    } catch {
+      setIsAdmin(false);
+    }
+  }
 
   async function load() {
     setLoading(true);
@@ -58,6 +69,7 @@ export default function Page() {
     const res = await fetch('/api/schedule', { cache: 'no-store' });
     if (res.status === 401) {
       setData(null);
+      setIsAdmin(false);
       setLoading(false);
       return;
     }
@@ -69,6 +81,7 @@ export default function Page() {
     }
     setData(json);
     setSelected((current) => current || getTodayInTokyo());
+    await loadAdminStatus();
     setLoading(false);
   }
 
@@ -79,6 +92,7 @@ export default function Page() {
   async function logout() {
     await fetch('/api/logout', { method: 'POST' });
     setData(null);
+    setIsAdmin(false);
   }
 
   const dayItems = useMemo(() => {
@@ -115,9 +129,11 @@ export default function Page() {
           </div>
           {data && (
             <div className="flex flex-wrap gap-2">
-              <a className="no-print rounded border bg-white px-4 py-2" href="/admin/upload">
-                Excelアップロード
-              </a>
+              {isAdmin && (
+                <a className="no-print rounded border bg-white px-4 py-2" href="/admin/upload">
+                  Excelアップロード
+                </a>
+              )}
               <button className="no-print rounded border bg-white px-4 py-2" onClick={logout}>
                 ログアウト
               </button>
