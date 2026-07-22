@@ -108,10 +108,7 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
                           title={`${item.startTime}〜${item.endTime} ${item.programName} ${item.eventName}${item.role ? ` / ${item.role}` : ''} / ${item.status}`}
                         >
                           {isShortSchedule ? (
-                            <>
-                              <p className="truncate font-bold">{item.startTime}</p>
-                              <p className="truncate font-semibold">{item.eventName}</p>
-                            </>
+                            <p className="truncate font-semibold leading-5">{item.eventName}</p>
                           ) : (
                             <>
                               <p className="truncate font-bold">{item.startTime}〜{item.endTime}</p>
