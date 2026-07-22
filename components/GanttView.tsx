@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { ScheduleItem, Staff } from '@/lib/types';
 import { getProgramColorStyles } from '@/lib/programColors';
 import { parseTimeToMinutes, sortByStartTime } from '@/lib/time';
@@ -27,6 +27,24 @@ type SelectedSchedule = {
 
 function toPercent(minutes: number) {
   return ((minutes - DAY_START) / DAY_MINUTES) * 100;
+}
+
+function getTokyoNow() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(new Date());
+  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value || '';
+
+  return {
+    date: `${value('year')}-${value('month')}-${value('day')}`,
+    minutes: Number(value('hour')) * 60 + Number(value('minute')),
+  };
 }
 
 function formatDuration(totalMinutes: number) {
@@ -83,7 +101,17 @@ function buildRows(items: ScheduleItem[], staff: Staff[]) {
 export default function GanttView({ items, staff }: { items: ScheduleItem[]; staff: Staff[] }) {
   const rows = buildRows(items, staff);
   const [selectedSchedule, setSelectedSchedule] = useState<SelectedSchedule | null>(null);
+  const [tokyoNow, setTokyoNow] = useState(getTokyoNow);
   const closeDetail = useCallback(() => setSelectedSchedule(null), []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setTokyoNow(getTokyoNow()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const currentDate = items[0]?.date;
+  const showCurrentTime = currentDate === tokyoNow.date && tokyoNow.minutes >= DAY_START && tokyoNow.minutes <= DAY_END;
+  const currentTimeLeft = Math.max(0, Math.min(100, toPercent(tokyoNow.minutes)));
 
   return (
     <>
@@ -118,6 +146,15 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
                       {String(hour).padStart(2, '0')}:00
                     </div>
                   ))}
+                  {showCurrentTime && (
+                    <div
+                      className="no-print absolute inset-y-0 z-20 border-l-2 border-red-500"
+                      style={{ left: `${currentTimeLeft}%` }}
+                      aria-label="現在時刻"
+                    >
+                      <span className="absolute left-1 top-0 whitespace-nowrap rounded bg-red-500 px-1 py-0.5 text-[10px] font-bold text-white">現在</span>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="divide-y">
@@ -137,6 +174,13 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
                           style={{ left: `${((hour * 60 - DAY_START) / DAY_MINUTES) * 100}%` }}
                         />
                       ))}
+                      {showCurrentTime && (
+                        <div
+                          className="no-print pointer-events-none absolute inset-y-0 z-20 border-l-2 border-red-500"
+                          style={{ left: `${currentTimeLeft}%` }}
+                          aria-hidden="true"
+                        />
+                      )}
                       {row.schedules.map(({ item, left, width, lane, durationMinutes }, index) => {
                         const isShortSchedule = durationMinutes < SHORT_SCHEDULE_MINUTES;
 
