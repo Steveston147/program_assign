@@ -116,40 +116,54 @@ export default function Page() {
   if (!data && !loading) return <PasswordGate onLogin={load} />;
 
   return (
-    <main className="min-h-screen bg-gray-100 p-4 md:p-6">
-      <div className="mx-auto max-w-7xl space-y-5">
-        <header className="flex flex-wrap items-center justify-between gap-3">
+    <main className="min-h-screen bg-slate-50 pb-12 text-slate-900">
+      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-7">
           <div>
-            <h1 className="text-2xl font-bold">留学サポートデスク・スケジュール管理</h1>
-            <p className="text-sm text-gray-600">
-              Excel読込状態: {loading ? '読込中' : error ? 'エラー' : '読込済み'}
-              {data ? ` / データ: ${sourceLabels[data.source]}` : ''}
-              {' / '}最終更新: {formatUpdatedAt(data?.updatedAt)}
-            </p>
+            <p className="text-xs font-bold tracking-[.18em] text-indigo-600">ONESTOP</p>
+            <h1 className="text-xl font-black">Program Assign</h1>
+            <p className="text-xs text-slate-500">Ritsumeikan Study Abroad Centre</p>
           </div>
           {data && (
-            <div className="flex flex-wrap gap-2">
+            <div className="no-print flex flex-wrap gap-2">
               {isAdmin && (
-                <a className="no-print rounded border bg-white px-4 py-2" href="/admin/upload">
+                <a
+                  className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                  href="/admin/upload"
+                >
                   Excelアップロード
                 </a>
               )}
-              <button className="no-print rounded border bg-white px-4 py-2" onClick={logout}>
+              <button
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                onClick={logout}
+              >
                 ログアウト
               </button>
             </div>
           )}
-        </header>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-[1500px] space-y-5 px-4 py-6 sm:px-7">
+        <section className="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+          <p className="text-sm text-slate-600">
+            Excel読込状態: {loading ? '読込中' : error ? 'エラー' : '読込済み'}
+            {data ? ` / データ: ${sourceLabels[data.source]}` : ''}
+            {' / '}最終更新: {formatUpdatedAt(data?.updatedAt)}
+          </p>
+        </section>
+
         {data?.source === 'seed' && (
-          <div className="rounded border border-amber-300 bg-amber-50 p-4 text-amber-900">
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-900">
             注意：サンプルデータを表示しています。実運用Excelをアップロードしてください。
           </div>
         )}
-        {error && <div className="rounded border border-red-300 bg-red-50 p-4 text-red-800">{error}</div>}
-        {loading && <div className="rounded border bg-white p-4">読み込み中...</div>}
+        {error && <div className="rounded-lg border border-rose-300 bg-rose-50 p-4 text-rose-800">{error}</div>}
+        {loading && <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">読み込み中...</div>}
         {data && (
           <>
-            <section className="no-print rounded-lg border bg-white p-4 shadow-sm">
+            <section className="no-print rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <DateSelector dates={data.dates} selected={selected} onChange={setSelected} />
                 <Filters
@@ -163,18 +177,18 @@ export default function Page() {
             </section>
             <section className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-xl font-bold">{selected} の社員別予定</h2>
-                <div className="no-print inline-flex rounded-lg border bg-white p-1 shadow-sm">
+                <h2 className="text-xl font-black text-slate-900">{selected} の社員別予定</h2>
+                <div className="no-print inline-flex rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
                   <button
                     type="button"
-                    className={`rounded-md px-4 py-2 text-sm font-semibold ${viewMode === 'card' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                    className={`rounded-md px-4 py-2 text-sm font-semibold ${viewMode === 'card' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
                     onClick={() => setViewMode('card')}
                   >
                     カード表示
                   </button>
                   <button
                     type="button"
-                    className={`rounded-md px-4 py-2 text-sm font-semibold ${viewMode === 'gantt' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                    className={`rounded-md px-4 py-2 text-sm font-semibold ${viewMode === 'gantt' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
                     onClick={() => setViewMode('gantt')}
                   >
                     ガント表示
@@ -184,7 +198,7 @@ export default function Page() {
               {viewMode === 'card' ? <StaffScheduleBoard items={dayItems} staff={visibleStaff} /> : <GanttView items={dayItems} staff={visibleStaff} />}
             </section>
             {viewMode === 'card' && <TimelineTable items={dayItems} />}
-            <p className="no-print text-xs text-gray-500">Excel本体はブラウザへ直接配信しません。アップロード済みデータがある場合はそれを優先表示します。</p>
+            <p className="no-print text-xs text-slate-500">Excel本体はブラウザへ直接配信しません。アップロード済みデータがある場合はそれを優先表示します。</p>
           </>
         )}
       </div>
