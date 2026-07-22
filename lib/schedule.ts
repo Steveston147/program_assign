@@ -1,7 +1,7 @@
-import type { ScheduleItem, ScheduleResponse, Staff } from './types';
+import type { ScheduleData, ScheduleItem, Staff } from './types';
 import { uniq } from './utils';
 
-export function buildScheduleResponse(items: ScheduleItem[], staff: Staff[]): ScheduleResponse {
+export function buildScheduleResponse(items: ScheduleItem[], staff: Staff[]): ScheduleData {
   const displayStaff = staff.length
     ? staff
     : uniq(items.map((item) => item.staffName)).map((staffName, idx) => ({
