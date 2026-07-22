@@ -7,8 +7,14 @@ import Filters, { FilterState } from '@/components/Filters';
 import StaffScheduleBoard from '@/components/StaffScheduleBoard';
 import TimelineTable from '@/components/TimelineTable';
 import GanttView from '@/components/GanttView';
-import type { ScheduleResponse } from '@/lib/types';
+import type { ScheduleDataSource, ScheduleResponse } from '@/lib/types';
 import { nearestDate } from '@/lib/utils';
+
+const sourceLabels: Record<ScheduleDataSource, string> = {
+  uploaded: 'アップロード済みデータ',
+  repository: '初期Excel',
+  seed: 'サンプルデータ',
+};
 
 const formatUpdatedAt = (updatedAt?: string) => {
   if (!updatedAt) return '未設定';
@@ -103,7 +109,9 @@ export default function Page() {
           <div>
             <h1 className="text-2xl font-bold">留学サポートデスク・スケジュール管理</h1>
             <p className="text-sm text-gray-600">
-              Excel読込状態: {loading ? '読込中' : error ? 'エラー' : '読込済み'} / 最終更新: {formatUpdatedAt(data?.updatedAt)}
+              Excel読込状態: {loading ? '読込中' : error ? 'エラー' : '読込済み'}
+              {data ? ` / データ: ${sourceLabels[data.source]}` : ''}
+              {' / '}最終更新: {formatUpdatedAt(data?.updatedAt)}
             </p>
           </div>
           {data && (
@@ -117,6 +125,11 @@ export default function Page() {
             </div>
           )}
         </header>
+        {data?.source === 'seed' && (
+          <div className="rounded border border-amber-300 bg-amber-50 p-4 text-amber-900">
+            注意：サンプルデータを表示しています。実運用Excelをアップロードしてください。
+          </div>
+        )}
         {error && <div className="rounded border border-red-300 bg-red-50 p-4 text-red-800">{error}</div>}
         {loading && <div className="rounded border bg-white p-4">読み込み中...</div>}
         {data && (
