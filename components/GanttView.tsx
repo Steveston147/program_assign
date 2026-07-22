@@ -84,7 +84,7 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
           <div className="max-h-[70vh] overflow-auto rounded border border-gray-200">
             <div className="min-w-[980px]">
               <div className="sticky top-0 z-10 grid grid-cols-[10rem_1fr] border-b bg-white text-xs font-semibold text-gray-600 shadow-sm">
-                <div className="border-r bg-gray-50 p-2">職員名</div>
+                <div className="sticky left-0 z-20 border-r bg-gray-50 p-2 shadow-[2px_0_4px_rgba(0,0,0,0.06)]">職員名</div>
                 <div className="relative h-10 bg-white">
                   {HOURS.map((hour) => (
                     <div
@@ -100,7 +100,7 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
               <div className="divide-y">
                 {rows.map((row) => (
                   <div key={row.staffName} className="grid grid-cols-[10rem_1fr]">
-                    <div className="flex items-center border-r bg-gray-50 p-3 font-semibold">{row.staffName}</div>
+                    <div className="sticky left-0 z-[5] flex items-center border-r bg-gray-50 p-3 font-semibold shadow-[2px_0_4px_rgba(0,0,0,0.06)]">{row.staffName}</div>
                     <div className="relative bg-white" style={{ minHeight: `${row.laneCount * 3.25 + 1}rem` }}>
                       {HOURS.map((hour) => (
                         <div
