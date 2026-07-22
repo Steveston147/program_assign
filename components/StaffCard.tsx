@@ -1,4 +1,81 @@
 import type { ScheduleItem } from '@/lib/types';
 import { getProgramColorStyles } from '@/lib/programColors';
 import StatusBadge from './StatusBadge';
-export default function StaffCard({ staffName, schedules }:{staffName:string;schedules:ScheduleItem[]}){ return <section className="print-card rounded-lg border bg-white p-4 shadow-sm"><h2 className="mb-3 border-b pb-2 text-lg font-bold">{staffName}</h2>{schedules.length===0?<p className="text-gray-500">予定なし</p>:<div className="space-y-3">{schedules.map((s,i)=><article key={`${s.staffName}-${s.startTime}-${i}`} className={`rounded border-l-4 p-3 ${getProgramColorStyles(s.programName)}`}><div className="flex items-center justify-between gap-2"><p className="font-bold">{s.startTime}〜{s.endTime}</p><StatusBadge status={s.status}/></div><p className="mt-1 font-semibold">{s.programName}</p><p className="text-sm">{s.eventName}</p><dl className="mt-2 grid grid-cols-[5.5rem_1fr] gap-x-2 gap-y-1 text-sm"><dt className="text-gray-500">役割</dt><dd>{s.role||'-'}</dd><dt className="text-gray-500">集合</dt><dd>{s.gatheringTime||'-'} / {s.gatheringPlace}</dd><dt className="text-gray-500">行先</dt><dd>{s.destination||'-'}</dd>{s.notes&&<><dt className="text-gray-500">備考</dt><dd>{s.notes}</dd></>}</dl></article>)}</div>}</section> }
+
+export default function StaffCard({
+  staffName,
+  schedules,
+}: {
+  staffName: string;
+  schedules: ScheduleItem[];
+}) {
+  return (
+    <section className="print-card overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+        <h2 className="min-w-0 truncate text-lg font-bold text-slate-900">
+          {staffName}
+        </h2>
+        <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+          {schedules.length}件
+        </span>
+      </div>
+
+      <div className="p-4">
+        {schedules.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+            本日の予定はありません
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {schedules.map((schedule, index) => (
+              <article
+                key={`${schedule.staffName}-${schedule.startTime}-${index}`}
+                className={`rounded-lg border border-slate-200 border-l-4 p-3 shadow-sm ${getProgramColorStyles(schedule.programName)}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-bold tabular-nums text-slate-900">
+                    {schedule.startTime}〜{schedule.endTime}
+                  </p>
+                  <StatusBadge status={schedule.status} />
+                </div>
+
+                <p className="mt-2 text-xs font-semibold text-slate-500">
+                  {schedule.programName}
+                </p>
+                <p className="mt-0.5 font-semibold leading-snug text-slate-900">
+                  {schedule.eventName}
+                </p>
+
+                <dl className="mt-3 grid grid-cols-[4rem_minmax(0,1fr)] gap-x-2 gap-y-1.5 border-t border-slate-200 pt-3 text-sm">
+                  <dt className="text-slate-500">役割</dt>
+                  <dd className="min-w-0 break-words text-slate-800">
+                    {schedule.role || '-'}
+                  </dd>
+
+                  <dt className="text-slate-500">集合</dt>
+                  <dd className="min-w-0 break-words text-slate-800">
+                    {schedule.gatheringTime || '-'} / {schedule.gatheringPlace}
+                  </dd>
+
+                  <dt className="text-slate-500">行先</dt>
+                  <dd className="min-w-0 break-words text-slate-800">
+                    {schedule.destination || '-'}
+                  </dd>
+
+                  {schedule.notes && (
+                    <>
+                      <dt className="text-slate-500">備考</dt>
+                      <dd className="min-w-0 break-words text-slate-800">
+                        {schedule.notes}
+                      </dd>
+                    </>
+                  )}
+                </dl>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
