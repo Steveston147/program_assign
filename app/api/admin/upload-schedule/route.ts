@@ -1,7 +1,7 @@
 import * as XLSX from 'xlsx';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { getAuthCookieName, verifyAuthCookieValue } from '@/lib/auth';
+import { getAdminAuthCookieName, verifyAdminAuthCookieValue } from '@/lib/auth';
 import { ExcelValidationError, readAppDataSheet, readStaffMaster } from '@/lib/excel';
 import { buildScheduleResponse } from '@/lib/schedule';
 import { writeUploadedSchedule } from '@/lib/blobSchedule';
@@ -13,9 +13,12 @@ const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
 
 export async function POST(request: Request) {
   try {
-    const cookie = (await cookies()).get(getAuthCookieName())?.value;
-    if (!verifyAuthCookieValue(cookie)) {
-      return NextResponse.json({ error: '未認証です。先にトップ画面でログインしてください。' }, { status: 401, headers: noStore });
+    const cookie = (await cookies()).get(getAdminAuthCookieName())?.value;
+    if (!verifyAdminAuthCookieValue(cookie)) {
+      return NextResponse.json(
+        { error: '管理者認証が必要です。' },
+        { status: 401, headers: noStore },
+      );
     }
 
     const formData = await request.formData();
