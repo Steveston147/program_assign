@@ -1,12 +1,109 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 :root { color: #111827; background: #f3f4f6; }
 body { margin: 0; font-family: Arial, Helvetica, sans-serif; }
+.print-only { display: none; }
+
 @media print {
   @page { size: A4 landscape; margin: 10mm; }
-  body { background: white; }
+
+  html,
+  body {
+    background: white !important;
+  }
+
+  body {
+    color: #111 !important;
+    font-size: 10pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   .no-print { display: none !important; }
-  .print-card { break-inside: avoid; box-shadow: none !important; border-color: #999 !important; }
-  .print-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+  .print-only { display: block !important; }
+
+  .print-root {
+    min-height: auto !important;
+    padding-bottom: 0 !important;
+    background: white !important;
+  }
+
+  .print-content {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .print-header {
+    margin-bottom: 8mm;
+    border-bottom: 1px solid #777;
+    padding-bottom: 4mm;
+  }
+
+  .print-header h1 {
+    margin: 0 0 3mm;
+    font-size: 18pt;
+    line-height: 1.2;
+  }
+
+  .print-header dl {
+    margin: 0;
+    font-size: 9.5pt;
+  }
+
+  .print-header dl > div {
+    display: grid;
+    grid-template-columns: 22mm minmax(0, 1fr);
+    gap: 3mm;
+    margin-top: 1mm;
+  }
+
+  .print-header dt {
+    font-weight: 700;
+  }
+
+  .print-header dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .screen-heading {
+    display: none !important;
+  }
+
+  .print-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .print-card,
+  .print-schedule {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-card {
+    border-color: #888 !important;
+    border-radius: 3px !important;
+    box-shadow: none !important;
+  }
+
+  .print-card > div:first-child {
+    border-color: #999 !important;
+  }
+
+  .print-schedule {
+    border-color: #999 !important;
+    border-left-color: #555 !important;
+    border-radius: 2px !important;
+    box-shadow: none !important;
+  }
+
+  .print-card,
+  .print-card * {
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
 }
