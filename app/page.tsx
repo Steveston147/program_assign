@@ -1,14 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import DateSelector, { getTodayInTokyo } from '@/components/DateSelector';
 import PasswordGate from '@/components/PasswordGate';
-import DateSelector from '@/components/DateSelector';
 import Filters, { FilterState } from '@/components/Filters';
 import StaffScheduleBoard from '@/components/StaffScheduleBoard';
 import TimelineTable from '@/components/TimelineTable';
 import GanttView from '@/components/GanttView';
 import type { ScheduleDataSource, ScheduleResponse } from '@/lib/types';
-import { nearestDate } from '@/lib/utils';
 
 const sourceLabels: Record<ScheduleDataSource, string> = {
   uploaded: 'アップロード済みデータ',
@@ -69,7 +68,7 @@ export default function Page() {
       return;
     }
     setData(json);
-    setSelected((s) => s || nearestDate(json.dates));
+    setSelected((current) => current || getTodayInTokyo());
     setLoading(false);
   }
 
