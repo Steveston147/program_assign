@@ -106,4 +106,46 @@ body { margin: 0; font-family: Arial, Helvetica, sans-serif; }
     overflow: visible !important;
     text-overflow: clip !important;
   }
+
+  .print-gantt {
+    border-color: #777 !important;
+    border-radius: 0 !important;
+    padding: 4mm !important;
+    box-shadow: none !important;
+  }
+
+  .print-gantt > div:first-child {
+    margin-bottom: 3mm !important;
+  }
+
+  .print-gantt-scroll {
+    max-height: none !important;
+    overflow: visible !important;
+    border-color: #888 !important;
+  }
+
+  .print-gantt-table {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .print-gantt-header,
+  .print-gantt-staff {
+    position: static !important;
+    box-shadow: none !important;
+  }
+
+  .print-gantt-header,
+  .print-gantt-row {
+    grid-template-columns: 30mm minmax(0, 1fr) !important;
+  }
+
+  .print-gantt-row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-gantt-item {
+    box-shadow: none !important;
+  }
 }

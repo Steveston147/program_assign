@@ -87,18 +87,27 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
 
   return (
     <>
-      <section className="rounded-lg border bg-white p-4 shadow-sm">
+      <section className="print-gantt rounded-lg border bg-white p-4 shadow-sm">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xl font-bold">ガント表示</h2>
-          <p className="rounded bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-700">予定件数：{items.length}件</p>
+          <div className="flex items-center gap-2">
+            <p className="rounded bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-700">予定件数：{items.length}件</p>
+            <button
+              type="button"
+              className="no-print inline-flex min-h-9 items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+              onClick={() => window.print()}
+            >
+              印刷
+            </button>
+          </div>
         </div>
         {items.length === 0 ? (
           <p className="rounded border border-dashed p-6 text-center text-gray-500">この日付・条件に一致する予定はありません。</p>
         ) : (
-          <div className="max-h-[70vh] overflow-auto rounded border border-gray-200">
-            <div className="min-w-[980px]">
-              <div className="sticky top-0 z-10 grid grid-cols-[10rem_1fr] border-b bg-white text-xs font-semibold text-gray-600 shadow-sm">
-                <div className="sticky left-0 z-20 border-r bg-gray-50 p-2 shadow-[2px_0_4px_rgba(0,0,0,0.06)]">職員名</div>
+          <div className="print-gantt-scroll max-h-[70vh] overflow-auto rounded border border-gray-200">
+            <div className="print-gantt-table min-w-[980px]">
+              <div className="print-gantt-header sticky top-0 z-10 grid grid-cols-[10rem_1fr] border-b bg-white text-xs font-semibold text-gray-600 shadow-sm">
+                <div className="print-gantt-staff sticky left-0 z-20 border-r bg-gray-50 p-2 shadow-[2px_0_4px_rgba(0,0,0,0.06)]">職員名</div>
                 <div className="relative h-10 bg-white">
                   {HOURS.map((hour) => (
                     <div
@@ -113,8 +122,8 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
               </div>
               <div className="divide-y">
                 {rows.map((row) => (
-                  <div key={row.staffName} className="grid grid-cols-[10rem_1fr]">
-                    <div className="sticky left-0 z-[5] flex flex-col justify-center border-r bg-gray-50 p-3 shadow-[2px_0_4px_rgba(0,0,0,0.06)]">
+                  <div key={row.staffName} className="print-gantt-row grid grid-cols-[10rem_1fr]">
+                    <div className="print-gantt-staff sticky left-0 z-[5] flex flex-col justify-center border-r bg-gray-50 p-3 shadow-[2px_0_4px_rgba(0,0,0,0.06)]">
                       <span className="font-semibold">{row.staffName}</span>
                       <span className="mt-1 text-xs font-normal text-gray-500">
                         {row.schedules.length}件・{formatDuration(row.totalMinutes)}
@@ -135,7 +144,7 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
                           <button
                             type="button"
                             key={`${item.staffName}-${item.startTime}-${item.endTime}-${item.programName}-${index}`}
-                            className={`absolute overflow-hidden rounded border-l-4 text-left shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${
+                            className={`print-gantt-item absolute overflow-hidden rounded border-l-4 text-left shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${
                               isShortSchedule ? 'px-1 py-0.5 text-[11px] leading-tight' : 'px-2 py-1 text-xs'
                             } ${getProgramColorStyles(item.programName)}`}
                             style={{ left: `${left}%`, width: `${width}%`, top: `${0.75 + lane * 3.25}rem` }}
