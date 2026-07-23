@@ -18,6 +18,9 @@ type PositionedSchedule = {
   width: number;
   lane: number;
   durationMinutes: number;
+  startMinutes: number;
+  endMinutes: number;
+  hasConflict: boolean;
 };
 
 type SelectedSchedule = {
@@ -86,14 +89,31 @@ function buildRows(items: ScheduleItem[], staff: Staff[]) {
         width: Math.max(1.5, Math.min(100 - toPercent(clippedStart), toPercent(clippedEnd) - toPercent(clippedStart))),
         lane: nextLane,
         durationMinutes: Math.max(0, safeEnd - safeStart),
+        startMinutes: safeStart,
+        endMinutes: safeEnd,
+        hasConflict: false as boolean,
       } satisfies PositionedSchedule;
     });
+
+    for (let firstIndex = 0; firstIndex < schedules.length; firstIndex += 1) {
+      for (let secondIndex = firstIndex + 1; secondIndex < schedules.length; secondIndex += 1) {
+        const first = schedules[firstIndex];
+        const second = schedules[secondIndex];
+        const overlaps = first.startMinutes < second.endMinutes && second.startMinutes < first.endMinutes;
+
+        if (overlaps) {
+          first.hasConflict = true;
+          second.hasConflict = true;
+        }
+      }
+    }
 
     return {
       staffName,
       schedules,
       laneCount: Math.max(1, laneEnds.length),
       totalMinutes: schedules.reduce((total, schedule) => total + schedule.durationMinutes, 0),
+      hasConflict: schedules.some((schedule) => schedule.hasConflict),
     };
   });
 }
@@ -165,6 +185,11 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
                       <span className="mt-1 text-xs font-normal text-gray-500">
                         {row.schedules.length}件・{formatDuration(row.totalMinutes)}
                       </span>
+                      {row.hasConflict ? (
+                        <span className="mt-1 inline-flex w-fit items-center rounded bg-red-100 px-1.5 py-0.5 text-[11px] font-bold text-red-700">
+                          時間重複あり
+                        </span>
+                      ) : null}
                     </div>
                     <div className="relative bg-white" style={{ minHeight: `${row.laneCount * 3.25 + 1}rem` }}>
                       {HOURS.map((hour) => (
@@ -181,8 +206,9 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
                           aria-hidden="true"
                         />
                       )}
-                      {row.schedules.map(({ item, left, width, lane, durationMinutes }, index) => {
+                      {row.schedules.map(({ item, left, width, lane, durationMinutes, hasConflict }, index) => {
                         const isShortSchedule = durationMinutes < SHORT_SCHEDULE_MINUTES;
+                        const conflictLabel = hasConflict ? '、同じ職員の別予定と時間が重複しています' : '';
 
                         return (
                           <button
@@ -190,10 +216,10 @@ export default function GanttView({ items, staff }: { items: ScheduleItem[]; sta
                             key={`${item.staffName}-${item.startTime}-${item.endTime}-${item.programName}-${index}`}
                             className={`print-gantt-item absolute overflow-hidden rounded border-l-4 text-left shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${
                               isShortSchedule ? 'px-1 py-0.5 text-[11px] leading-tight' : 'px-2 py-1 text-xs'
-                            } ${getProgramColorStyles(item.programName)}`}
+                            } ${hasConflict ? 'ring-2 ring-red-500 ring-offset-1' : ''} ${getProgramColorStyles(item.programName)}`}
                             style={{ left: `${left}%`, width: `${width}%`, top: `${0.75 + lane * 3.25}rem` }}
-                            title={`${item.startTime}〜${item.endTime} ${item.programName} ${item.eventName}${item.role ? ` / ${item.role}` : ''} / ${item.status}`}
-                            aria-label={`${item.startTime}から${item.endTime}、${item.eventName}の詳細を開く`}
+                            title={`${item.startTime}〜${item.endTime} ${item.programName} ${item.eventName}${item.role ? ` / ${item.role}` : ''} / ${item.status}${conflictLabel}`}
+                            aria-label={`${item.startTime}から${item.endTime}、${item.eventName}の詳細を開く${conflictLabel}`}
                             onClick={(event) => setSelectedSchedule({ item, trigger: event.currentTarget })}
                           >
                             {isShortSchedule ? (
