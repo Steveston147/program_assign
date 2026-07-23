@@ -55,7 +55,7 @@ export default function ExcelTemplateDownloadButton() {
 
     const guide = XLSX.utils.aoa_to_sheet([
       ['Program Assign アップロード用ひな形'],
-      ['黄色の2行目は入力例です。実際の予定・職員情報に置き換えてください。'],
+      ['2行目は入力例です。実際の予定・職員情報に置き換えてください。'],
       ['シート名 App_Data / Master_Staff と1行目の英語ヘッダーは変更しないでください。'],
       ['Date は yyyy-mm-dd、時刻は HH:mm で入力してください。'],
       ['App_Data の必須列：Date、StaffName、StartTime、EndTime、ProgramName、GatheringPlace、EventName、Status'],
