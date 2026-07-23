@@ -37,6 +37,7 @@ export default function ScheduleBackupsPanel() {
   const [selected, setSelected] = useState<ScheduleBackup | null>(null);
   const [loading, setLoading] = useState(true);
   const [restoring, setRestoring] = useState(false);
+  const [unauthorized, setUnauthorized] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -46,7 +47,13 @@ export default function ScheduleBackupsPanel() {
     try {
       const response = await fetch('/api/admin/schedule-backups', { cache: 'no-store' });
       const json = await response.json();
+      if (response.status === 401) {
+        setUnauthorized(true);
+        setBackups([]);
+        return;
+      }
       if (!response.ok) throw new Error(json.error || 'バックアップ一覧を読み込めませんでした。');
+      setUnauthorized(false);
       setBackups(Array.isArray(json.backups) ? json.backups : []);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'バックアップ一覧を読み込めませんでした。');
@@ -71,6 +78,10 @@ export default function ScheduleBackupsPanel() {
         body: JSON.stringify({ pathname: selected.pathname }),
       });
       const json = await response.json();
+      if (response.status === 401) {
+        setUnauthorized(true);
+        return;
+      }
       if (!response.ok) throw new Error(json.error || 'バックアップの復元に失敗しました。');
       setMessage(`${formatDateTime(selected.createdAt)} のバックアップを復元しました。`);
       setSelected(null);
@@ -81,6 +92,8 @@ export default function ScheduleBackupsPanel() {
       setRestoring(false);
     }
   }
+
+  if (unauthorized) return null;
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
