@@ -1,4 +1,19 @@
 import './globals.css';
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: '留学サポートデスク・スケジュール管理', description: '短期留学生受入プログラム職員スケジュール管理MVP' };
-export default function RootLayout({ children }: { children: React.ReactNode }) { return <html lang="ja"><body>{children}</body></html>; }
+import DataFreshnessWarning from '@/components/DataFreshnessWarning';
+
+export const metadata: Metadata = {
+  title: '留学サポートデスク・スケジュール管理',
+  description: '短期留学生受入プログラム職員スケジュール管理MVP',
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="ja">
+      <body>
+        {children}
+        <DataFreshnessWarning />
+      </body>
+    </html>
+  );
+}
