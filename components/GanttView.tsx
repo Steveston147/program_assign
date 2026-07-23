@@ -91,7 +91,7 @@ function buildRows(items: ScheduleItem[], staff: Staff[]) {
         durationMinutes: Math.max(0, safeEnd - safeStart),
         startMinutes: safeStart,
         endMinutes: safeEnd,
-        hasConflict: false,
+        hasConflict: false as boolean,
       } satisfies PositionedSchedule;
     });
 
