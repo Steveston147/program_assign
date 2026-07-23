@@ -64,10 +64,11 @@ function backupPath(date = new Date()): string {
 }
 
 function toBackupSummary(pathname: string, schedule: ScheduleData, fallbackCreatedAt?: string): ScheduleBackupSummary {
-  const dates = [...(schedule.dates || [])].sort();
-  const programs = [...new Set(schedule.programs || schedule.items.map((item) => item.programName).filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b, 'ja'),
-  );
+  const dates = [...(schedule.dates || schedule.items.map((item) => item.date).filter(Boolean))].sort();
+  const sourcePrograms = schedule.programs?.length
+    ? schedule.programs
+    : schedule.items.map((item) => item.programName).filter(Boolean);
+  const programs = [...new Set(sourcePrograms)].sort((a, b) => a.localeCompare(b, 'ja'));
   const pathTimestamp = pathname.slice(BACKUP_PREFIX.length).replace(/\.json$/, '').replace(
     /^(\d{4}-\d{2}-\d{2}T\d{2})-(\d{2})-(\d{2})-(\d{3})Z$/,
     '$1:$2:$3.$4Z',
@@ -95,7 +96,7 @@ export async function readUploadedSchedule(): Promise<ScheduleData | null> {
 }
 
 export async function createCurrentScheduleBackup(): Promise<string | null> {
-  const current = await readUploadedSchedule();
+  const current = await readScheduleAtPath(CURRENT_SCHEDULE_PATH);
   if (!current) return null;
 
   const pathname = backupPath();
@@ -115,13 +116,15 @@ export async function listScheduleBackups(): Promise<ScheduleBackupSummary[]> {
   });
 
   const recent = [...result.blobs]
-    .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
+    .sort((a, b) => new Date(String(b.uploadedAt)).getTime() - new Date(String(a.uploadedAt)).getTime())
     .slice(0, BACKUP_LIST_LIMIT);
 
   const summaries = await Promise.all(
     recent.map(async (blob) => {
       const schedule = await readScheduleAtPath(blob.pathname);
-      return schedule ? toBackupSummary(blob.pathname, schedule, new Date(blob.uploadedAt).toISOString()) : null;
+      const uploadedAt = new Date(String(blob.uploadedAt));
+      const fallback = Number.isNaN(uploadedAt.getTime()) ? '' : uploadedAt.toISOString();
+      return schedule ? toBackupSummary(blob.pathname, schedule, fallback) : null;
     }),
   );
 
