@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import ExcelTemplateDownloadButton from '@/components/ExcelTemplateDownloadButton';
 
 export default function UploadSchedulePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -192,6 +193,8 @@ export default function UploadSchedulePage() {
                   />
                 </div>
 
+                <ExcelTemplateDownloadButton />
+
                 <button
                   className="rounded-lg bg-slate-900 px-5 py-3 font-bold text-white transition hover:bg-slate-800 disabled:opacity-50"
                   onClick={upload}
@@ -210,6 +213,7 @@ export default function UploadSchedulePage() {
               <ul className="mt-2 list-disc pl-5">
                 <li>必須シート：App_Data、Master_Staff</li>
                 <li>必須列：Date、StaffName、StartTime、EndTime、ProgramName、GatheringPlace、EventName、Status</li>
+                <li>ひな形の黄色い2行目は入力例です。実際の予定・職員情報に置き換えてください。</li>
                 <li>アップロード後、トップ画面を再読み込みすると新しい予定が表示されます。</li>
               </ul>
             </section>
